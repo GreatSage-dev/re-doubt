@@ -234,19 +234,19 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
               PHASE 0{state.currentStep}
             </span>
             <span className="text-xs font-mono text-zinc-400">
-              {state.currentStep === 1 && 'Radar Check · See the Difference'}
-              {state.currentStep === 2 && 'Get Practice Coins · Exchange Ingress'}
-              {state.currentStep === 3 && 'Seal into Shield · Orchard ZK Pool'}
-              {state.currentStep === 4 && 'Time Capsule Memo · Private z-to-z'}
-              {state.currentStep === 5 && 'Graduation · Key Vault & Real Flight'}
+              {state.currentStep === 1 && 'Radar Check · See the Contrast'}
+              {state.currentStep === 2 && 'Get Practice Coins · Exchange Withdrawal'}
+              {state.currentStep === 3 && 'Make It Private · Slip into the Envelope'}
+              {state.currentStep === 4 && 'Private Letter · Time Capsule Memo'}
+              {state.currentStep === 5 && 'Flight Mastery · Certificate & Key'}
             </span>
           </div>
           <h2 className="text-lg font-bold text-[#ECEAF5] mt-1 tracking-tight">
             {state.currentStep === 1 && 'The Postcard vs. The Envelope'}
-            {state.currentStep === 2 && 'Receive 5.00 Free Practice ZEC'}
-            {state.currentStep === 3 && 'Seal Your ZEC into the Shielded Pool'}
-            {state.currentStep === 4 && 'Send Your First Private Time Capsule'}
-            {state.currentStep === 5 && 'Graduate to Solo Flight (Your Real Key)'}
+            {state.currentStep === 2 && 'Claim 5.00 Free Practice Coins'}
+            {state.currentStep === 3 && 'Shield 5.00 ZEC into the Private Pool'}
+            {state.currentStep === 4 && 'Send a Sealed Letter to Future You'}
+            {state.currentStep === 5 && 'You’re Flight Certified! Claim Your Award'}
           </h2>
         </div>
 
@@ -476,8 +476,8 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <Shield className="w-4 h-4" />
                 <span>
                   {state.isShieldingInProgress 
-                    ? `Synthesizing Proof (${state.zkProofProgress}%)...` 
-                    : `Shield ${state.transparentBalance.toFixed(4)} ZEC into Orchard Pool 🛡️`}
+                    ? `Sealing into Envelope (${state.zkProofProgress}%)...` 
+                    : `Shield ${state.transparentBalance.toFixed(4)} ZEC (Make It Invisible) 🛡️`}
                 </span>
               </button>
             </div>
@@ -495,7 +495,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <span>FLIGHT INSTRUCTOR BRIEFING</span>
               </div>
               <p className="text-xs text-[#ECEAF5] leading-relaxed">
-                Now write a letter to your future self (or recipient). On Bitcoin or Ethereum, notes are public plaintext broadcast to the whole world. On Zcash Orchard, memos are <strong>encrypted with ChaCha20-Poly1305</strong> inside the envelope—only the recipient can decrypt it.
+                Now write a letter to your future self (or recipient). On Bitcoin or Ethereum, payment notes are public plaintext broadcast to the whole world. On Zcash, memos are <strong>sealed inside the private envelope</strong>—only the recipient can decrypt it.
               </p>
             </div>
 
@@ -561,35 +561,50 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
         {state.currentStep === 5 && (
           <div className="space-y-4 animate-fade-in font-sans">
             
-            {/* Co-Pilot Briefing Card */}
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
-              <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>FLIGHT INSTRUCTOR DEBRIEF</span>
+            {/* Celebratory Award Banner */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-[#5632F5]/25 via-[#7738FF]/20 to-[#D580FA]/15 border border-[#7738FF]/50 text-center space-y-3 shadow-[0_10px_30px_-10px_rgba(119,56,255,0.4)]">
+              <div className="mx-auto w-12 h-12 rounded-2xl bg-[#5632F5]/30 border border-[#7738FF]/50 flex items-center justify-center text-[#D580FA] shadow-[0_0_20px_rgba(119,56,255,0.4)]">
+                <Award className="w-6 h-6 text-[#D580FA]" />
               </div>
-              <p className="text-xs text-[#ECEAF5] leading-relaxed">
-                You’ve completed the flight training! You now know exactly how Zcash protects you. Below is your <strong>master recovery key</strong> and your launchpad to take flight in the real world with Zashi or Ywallet.
-              </p>
+              <div>
+                <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#5632F5]/30 text-[#EBDEFA] border border-[#5632F5]/50">
+                  Mission Accomplished
+                </span>
+                <h3 className="text-lg font-bold text-white tracking-tight mt-1.5">You’re Flight Certified! 🏆</h3>
+                <p className="text-xs text-zinc-300 max-w-sm mx-auto mt-1 leading-relaxed">
+                  You successfully tested receiving coins, shielding into the envelope, and sending an encrypted time capsule with zero risk.
+                </p>
+              </div>
+
+              <div className="pt-1 flex flex-col sm:flex-row gap-2.5 justify-center">
+                <button
+                  onClick={onOpenCertificate}
+                  className="py-3 px-6 bg-gradient-to-r from-[#7738FF] to-[#D580FA] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_25px_rgba(119,56,255,0.5)] cursor-pointer hover:scale-[1.02]"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>View Flight Certificate & Share on X 🚀</span>
+                </button>
+              </div>
             </div>
 
-            {/* 24-Word Master Key Vault */}
+            {/* Optional Practice 24-Word Master Key Vault */}
             <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
                 <div className="flex items-center space-x-1.5 font-sans">
                   <Key className="w-3.5 h-3.5 text-[#D580FA]" />
-                  <span className="font-semibold text-white">Your Master Key (24 Words)</span>
+                  <span className="font-semibold text-white">Practice Recovery Key (24 Words)</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setShowSeed(!showSeed)}
-                    className="text-zinc-400 hover:text-white text-[10px] flex items-center space-x-1"
+                    className="text-zinc-400 hover:text-white text-[10px] flex items-center space-x-1 cursor-pointer"
                   >
                     {showSeed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                     <span>{showSeed ? 'Hide' : 'Reveal'}</span>
                   </button>
                   <button
                     onClick={() => handleCopy(state.seedPhrase.join(' '))}
-                    className="text-[#D580FA] hover:text-white text-[10px] flex items-center space-x-1"
+                    className="text-[#D580FA] hover:text-white text-[10px] flex items-center space-x-1 cursor-pointer"
                   >
                     {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                     <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -597,12 +612,16 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   <button
                     onClick={handleRegenerateSeed}
                     title="Generate new 24 words"
-                    className="text-zinc-400 hover:text-white p-1"
+                    className="text-zinc-400 hover:text-white p-1 cursor-pointer"
                   >
                     <RefreshCw className="w-3 h-3" />
                   </button>
                 </div>
               </div>
+
+              <p className="text-[11px] text-zinc-400 font-sans leading-normal">
+                In real wallets like Zashi, your wallet generates a secret 24-word key like this. Write it down and never share it.
+              </p>
 
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 text-xs">
                 {state.seedPhrase.map((word, i) => (
@@ -622,7 +641,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <div className="flex space-x-1.5">
                   <button
                     onClick={() => onUpdateState({ selectedWalletClient: 'zashi' })}
-                    className={`px-2.5 py-1 rounded-lg border text-xs transition ${
+                    className={`px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
                       state.selectedWalletClient === 'zashi'
                         ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold'
                         : 'border-white/5 bg-black/20 text-zinc-400'
@@ -632,7 +651,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   </button>
                   <button
                     onClick={() => onUpdateState({ selectedWalletClient: 'ywallet' })}
-                    className={`px-2.5 py-1 rounded-lg border text-xs transition ${
+                    className={`px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
                       state.selectedWalletClient === 'ywallet'
                         ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold'
                         : 'border-white/5 bg-black/20 text-zinc-400'
@@ -644,26 +663,18 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
               </div>
             </div>
 
-            {/* Real World Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Install Real Wallet Links */}
+            <div className="pt-1">
               <a
                 href={state.selectedWalletClient === 'zashi' ? 'https://zashi.org' : 'https://ywallet.app'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="py-3 px-4 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition"
+                className="w-full py-3 px-4 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition"
               >
                 <Download className="w-4 h-4 text-[#D580FA]" />
-                <span>Install {state.selectedWalletClient === 'zashi' ? 'Zashi' : 'Ywallet'}</span>
+                <span>Install Official Mobile Wallet ({state.selectedWalletClient === 'zashi' ? 'Zashi' : 'Ywallet'})</span>
                 <ExternalLink className="w-3.5 h-3.5 text-zinc-400 ml-1" />
               </a>
-
-              <button
-                onClick={onOpenCertificate}
-                className="py-3 px-4 bg-gradient-to-r from-[#7738FF] to-[#D580FA] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_25px_rgba(119,56,255,0.4)] cursor-pointer hover:scale-[1.01]"
-              >
-                <Award className="w-4 h-4" />
-                <span>Claim Flight Certificate 🏆</span>
-              </button>
             </div>
           </div>
         )}
