@@ -10,9 +10,9 @@ interface FlightNavProps {
 const STEPS = [
   { id: 1 as FlightStepId, num: '01', key: '1', label: '1. Radar Check', icon: Eye, desc: 'See the Contrast' },
   { id: 2 as FlightStepId, num: '02', key: '2', label: '2. Practice ZEC', icon: ArrowDownToLine, desc: 'Exchange Ingress' },
-  { id: 3 as FlightStepId, num: '03', key: '3', label: '3. Shield Funds', icon: ShieldCheck, desc: 'Orchard ZK Pool' },
-  { id: 4 as FlightStepId, num: '04', key: '4', label: '4. Time Capsule', icon: Mail, desc: 'Encrypted Memo' },
-  { id: 5 as FlightStepId, num: '05', key: '5', label: '5. Graduate', icon: KeyRound, desc: 'Key Vault & QR' },
+  { id: 3 as FlightStepId, num: '03', key: '3', label: '3. Shield Funds', icon: ShieldCheck, desc: 'Make It Private' },
+  { id: 4 as FlightStepId, num: '04', key: '4', label: '4. Encrypted Memo', icon: Mail, desc: 'Sealed Dispatch' },
+  { id: 5 as FlightStepId, num: '05', key: '5', label: '5. Graduate', icon: Award, desc: 'Flight Certified' },
 ];
 
 export const FlightNav: React.FC<FlightNavProps> = ({ currentStep, completedSteps, onSelectStep }) => {

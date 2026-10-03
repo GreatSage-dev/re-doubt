@@ -47,9 +47,9 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   const [showKeyDrill, setShowKeyDrill] = useState(false);
   const [isKeySaved, setIsKeySaved] = useState(false);
 
-  // Time Capsule Send state (Step 4)
-  const defaultLetter = 'Dear future me: Privacy is an inviolable human right. This letter was sealed with Zero-Knowledge proofs on Zcash.';
-  const [sendMemo, setSendMemo] = useState(defaultLetter);
+  // Sealed Dispatch Send state (Step 4)
+  const defaultDispatch = 'Flight Log #001: Financial privacy restored. This transaction is verified on-chain, but this message is private.';
+  const [sendMemo, setSendMemo] = useState(defaultDispatch);
   const [isSending, setIsSending] = useState(false);
 
   // QR Code for Step 5
@@ -179,7 +179,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
     }, 1500);
   };
 
-  // ── Step 4: Transmit Sealed Time Capsule (z-to-z Send) ──────────────────
+  // ── Step 4: Transmit Sealed Dispatch (z-to-z Send) ──────────────────
   const handleSendPrivateMemo = () => {
     if (state.shieldedBalance < 1.0 || isSending) return;
 
@@ -237,16 +237,16 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
             <span className="text-xs font-mono text-zinc-400">
               {state.currentStep === 1 && 'Radar Check · See the Contrast'}
               {state.currentStep === 2 && 'Get Practice Coins · Exchange Withdrawal'}
-              {state.currentStep === 3 && 'Make It Private · Slip into the Envelope'}
-              {state.currentStep === 4 && 'Private Letter · Time Capsule Memo'}
-              {state.currentStep === 5 && 'Flight Mastery · Certificate & Key'}
+              {state.currentStep === 3 && 'Shield Funds · Make It Private'}
+              {state.currentStep === 4 && 'Encrypted Memo · Sealed Dispatch'}
+              {state.currentStep === 5 && 'Flight Certified · Mobile Graduation'}
             </span>
           </div>
           <h2 className="text-lg font-bold text-[#ECEAF5] mt-1 tracking-tight">
             {state.currentStep === 1 && 'The Postcard vs. The Envelope'}
             {state.currentStep === 2 && 'Claim 5.00 Free Practice Coins'}
-            {state.currentStep === 3 && 'Shield 5.00 ZEC into the Private Pool'}
-            {state.currentStep === 4 && 'Send a Sealed Letter to Future You'}
+            {state.currentStep === 3 && 'Shield 5.00 ZEC (Make It Invisible)'}
+            {state.currentStep === 4 && 'Transmit a Sealed Flight Dispatch'}
             {state.currentStep === 5 && 'You’re Flight Certified! Claim Your Award'}
           </h2>
         </div>
@@ -434,7 +434,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
           </div>
         )}
 
-        {/* ── PHASE 3: SHIELD IT (ORCHARD ZK POOL) ──────────────────── */}
+        {/* ── PHASE 3: SHIELD IT (MAKE IT PRIVATE) ─────────────────── */}
         {state.currentStep === 3 && (
           <div className="space-y-4 animate-fade-in font-sans">
             
@@ -445,7 +445,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <span>FLIGHT INSTRUCTOR BRIEFING</span>
               </div>
               <p className="text-xs text-[#ECEAF5] leading-relaxed">
-                Look at the red radar on the right: your 5.00 ZEC is visible to anyone on the blockchain. Now let's slip it into the envelope. Shielding creates a mathematical zero-knowledge proof that hides your balance and identity from the world while proving the coins are 100% genuine.
+                Your 5.00 ZEC is still sitting in the open — anyone can see it. Click the button below to put it inside the private envelope. After this step, the public radar will no longer be able to see your balance or who you are.
               </p>
             </div>
 
@@ -453,7 +453,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
             <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
                 <span>Shielding Operation</span>
-                <span className="text-emerald-400 font-bold">Public → Shielded Envelope</span>
+                <span className="text-emerald-400 font-bold">Public → Private</span>
               </div>
 
               <div className="space-y-2 text-[11px]">
@@ -467,7 +467,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Shielding Technology:</span>
-                  <span className="text-[#D580FA]">Zero-Knowledge Shield (Orchard)</span>
+                  <span className="text-[#D580FA]">Private proof generated (Orchard)</span>
                 </div>
               </div>
 
@@ -499,14 +499,14 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <span>
                   {state.isShieldingInProgress 
                     ? `Sealing into Envelope (${state.zkProofProgress}%)...` 
-                    : `Shield ${state.transparentBalance.toFixed(4)} ZEC (Make It Invisible) 🛡️`}
+                    : `Shield 5.00 ZEC (Make It Invisible) 🛡️`}
                 </span>
               </button>
             </div>
           </div>
         )}
 
-        {/* ── PHASE 4: TIME CAPSULE MEMO (PRIVATE SEND) ─────────────── */}
+        {/* ── PHASE 4: ENCRYPTED MEMO (SEALED DISPATCH) ─────────────── */}
         {state.currentStep === 4 && (
           <div className="space-y-4 animate-fade-in font-sans">
             
@@ -517,14 +517,14 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <span>FLIGHT INSTRUCTOR BRIEFING</span>
               </div>
               <p className="text-xs text-[#ECEAF5] leading-relaxed">
-                Now write a letter to your future self (or recipient). On Bitcoin or Ethereum, payment notes are public plaintext broadcast to the whole world. On Zcash, memos are <strong>sealed inside the private envelope</strong>—only the recipient can decrypt it.
+                Now write a confidential memo to transmit with your transaction. On Bitcoin or Ethereum, payment notes are public plaintext broadcast to the whole world. On Zcash, memos are <strong>sealed inside the private envelope</strong>—only the recipient's viewing key can decrypt it.
               </p>
             </div>
 
-            {/* Encrypted Letter Pad */}
+            {/* Encrypted Dispatch Pad */}
             <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
-                <span>Time Capsule Letter Pad</span>
+                <span>Confidential Dispatch Pad</span>
                 <span className={`text-[10px] ${isMemoTooLong ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
                   {memoByteCount} / 512 bytes
                 </span>
@@ -536,7 +536,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   rows={3}
                   value={sendMemo}
                   onChange={(e) => setSendMemo(e.target.value)}
-                  placeholder="Write a message to your future self..."
+                  placeholder="Write a confidential dispatch to yourself or recipient..."
                   className="w-full bg-black/50 border border-white/[0.1] rounded-xl p-3 text-xs text-white focus:border-[#7738FF] focus:outline-none resize-none leading-relaxed"
                 />
               </div>
@@ -545,10 +545,10 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
               <div className="flex items-center space-x-2 font-sans">
                 <button
                   type="button"
-                  onClick={() => setSendMemo('Dear future me: Privacy is an inviolable human right. Sealed with Zero-Knowledge proofs on Zcash.')}
+                  onClick={() => setSendMemo('Flight Log #001: Financial privacy restored. This transaction is verified on-chain, but this message is private.')}
                   className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[10px] text-zinc-300 transition cursor-pointer"
                 >
-                  ✉️ "Letter to Future Self"
+                  🛰️ "Flight Log Entry"
                 </button>
                 <button
                   type="button"
@@ -573,7 +573,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 className="w-full py-3.5 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] disabled:opacity-40 cursor-pointer hover:scale-[1.01]"
               >
                 <Mail className="w-4 h-4" />
-                <span>{isSending ? 'Encrypting & Transmitting...' : 'Transmit Sealed Letter (Private z-to-z Send) ✉️'}</span>
+                <span>{isSending ? 'Encrypting & Transmitting...' : 'Transmit Sealed Dispatch (Private Send) ✉️'}</span>
               </button>
             </div>
           </div>
@@ -594,7 +594,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 </span>
                 <h3 className="text-lg font-bold text-white tracking-tight mt-1.5">You’re Flight Certified! 🏆</h3>
                 <p className="text-xs text-zinc-300 max-w-sm mx-auto mt-1 leading-relaxed">
-                  You successfully tested receiving coins, shielding into the envelope, and sending an encrypted time capsule with zero risk.
+                  You successfully tested receiving coins, shielding into the envelope, and transmitting an encrypted flight dispatch with zero risk.
                 </p>
               </div>
 
@@ -740,9 +740,9 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
           <span className="text-[11px] font-mono">
             {state.currentStep === 1 && 'Objective: Compare Transparent vs Shielded views on the radar'}
             {state.currentStep === 2 && 'Objective: Claim 5.00 practice coins into transparent address'}
-            {state.currentStep === 3 && 'Objective: Seal coins into Orchard zero-knowledge pool'}
-            {state.currentStep === 4 && 'Objective: Transmit encrypted time capsule note to future self'}
-            {state.currentStep === 5 && 'Mastery Achieved: Ready for real-world shielded flight'}
+            {state.currentStep === 3 && 'Objective: Seal coins inside the private envelope'}
+            {state.currentStep === 4 && 'Objective: Transmit confidential sealed dispatch to yourself'}
+            {state.currentStep === 5 && 'Flight Certified: Ready for real-world shielded flight'}
           </span>
         </div>
 

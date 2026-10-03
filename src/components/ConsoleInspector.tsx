@@ -193,22 +193,22 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 font-bold text-xs uppercase">
                       <ShieldCheck className="w-4 h-4 text-emerald-400 animate-pulse" />
-                      <span>ZERO-KNOWLEDGE SHIELD ACTIVE: 100% PRIVATE</span>
+                      <span>PRIVATE ENVELOPE SEALED: 100% PRIVATE</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">ORCHARD ZK</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">SEALED</span>
                   </div>
                   <p className="text-xs text-emerald-200/90 leading-relaxed font-sans">
-                    Your funds are sealed inside the <strong>Orchard Shielded Pool</strong>. Public balance is 0.00 ZEC. Halo 2 zero-knowledge proofs prove transaction validity mathematically without revealing sender, receiver, balance, or memo metadata.
+                    Private envelope sealed. Your balance is now hidden from the public radar. Only you can see it.
                   </p>
                 </div>
               )}
 
-              {/* Step 4 Special: Time Capsule Dual View */}
+              {/* Step 4 Special: Confidential Dispatch Dual View */}
               {state.currentStep === 4 && (
                 <div className="rounded-2xl border border-[#7738FF]/40 bg-[#120E29] p-4 space-y-3">
                   <div className="flex items-center justify-between text-xs font-semibold text-[#D580FA]">
-                    <span>TIME CAPSULE: SAME LETTER, TWO VIEWS</span>
-                    <span className="text-[10px] text-zinc-400">ZIP-302 ENCRYPTED MEMO</span>
+                    <span>CONFIDENTIAL DISPATCH: SAME MEMO, TWO REALITIES</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">ZIP-302 ENCRYPTED MEMO</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -217,7 +217,7 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
                         ✓ What You and Recipient See:
                       </span>
                       <p className="text-zinc-200 font-sans italic text-xs leading-relaxed">
-                        "{state.practiceMemo || 'Dear future me, privacy is a human right. Sealed with Zero-Knowledge.'}"
+                        "{state.practiceMemo || 'Flight Log #001: Financial privacy restored. This transaction is verified on-chain, but this message is private.'}"
                       </p>
                     </div>
 
@@ -226,7 +226,7 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
                         👁️ What Public Surveillance Sees:
                       </span>
                       <p className="text-zinc-500 font-mono text-[10px] break-all leading-relaxed">
-                        0x8f2a9c41b802e3... [CIPHERTEXT ENCRYPTED · CHACHA20-POLY1305 · 0 BYTES LEAKED]
+                        0x8f2a9c41b802e3... [512-BYTE ENCRYPTED CIPHERTEXT · 0 BYTES LEAKED]
                       </p>
                     </div>
                   </div>
