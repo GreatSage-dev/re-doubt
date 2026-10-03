@@ -279,57 +279,78 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
             </div>
 
             {/* Interactive Toggle: Feel the Contrast */}
-            <div className="space-y-2">
-              <div className="text-xs font-medium text-zinc-300">
-                Click to inspect both realities on the radar mirror to the right:
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between text-xs font-semibold text-zinc-300">
+                <span className="flex items-center space-x-1.5">
+                  <Radio className="w-3.5 h-3.5 text-[#D580FA] animate-pulse" />
+                  <span>Interactive Test: Click to flip the radar mirror to the right</span>
+                </span>
+                <span className="text-[10px] text-[#A69FC6] font-mono hidden sm:inline">
+                  LIVE REAL-TIME PREVIEW
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Option A: Transparent Postcard */}
                 <button
+                  type="button"
                   onClick={() => handleToggleRadarPreview('transparent')}
-                  className={`p-4 rounded-2xl border text-left transition relative cursor-pointer ${
+                  className={`p-4 rounded-2xl border text-left transition-all duration-200 relative cursor-pointer ${
                     (state.radarPreview ?? 'transparent') === 'transparent'
-                      ? 'border-rose-500/50 bg-rose-500/10 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
-                      : 'border-white/[0.08] bg-[#0A0815]/80 hover:border-white/20'
+                      ? 'border-rose-500 bg-rose-500/15 shadow-[0_0_30px_rgba(244,63,94,0.25)] ring-1 ring-rose-500/50 scale-[1.01]'
+                      : 'border-white/[0.08] bg-[#0A0815]/80 hover:border-white/20 opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-rose-400 flex items-center space-x-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <AlertTriangle className="w-4 h-4" />
                       <span>The Public Postcard (t1...)</span>
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono">
-                      EXPOSED
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                      (state.radarPreview ?? 'transparent') === 'transparent'
+                        ? 'bg-rose-500 text-white'
+                        : 'bg-rose-500/20 text-rose-300'
+                    }`}>
+                      {(state.radarPreview ?? 'transparent') === 'transparent' ? '● ACTIVE ON RADAR' : 'EXPOSED'}
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-snug">
-                    Sender, receiver, and balances are 100% visible on block explorers. Exchange KYC identity can be linked.
+                    Sender, receiver, and balances are 100% visible to anyone with an internet connection.
                   </p>
                 </button>
 
                 {/* Option B: Shielded Envelope */}
                 <button
+                  type="button"
                   onClick={() => handleToggleRadarPreview('shielded')}
-                  className={`p-4 rounded-2xl border text-left transition relative cursor-pointer ${
+                  className={`p-4 rounded-2xl border text-left transition-all duration-200 relative cursor-pointer ${
                     state.radarPreview === 'shielded'
-                      ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
-                      : 'border-white/[0.08] bg-[#0A0815]/80 hover:border-white/20'
+                      ? 'border-emerald-500 bg-emerald-500/15 shadow-[0_0_30px_rgba(16,185,129,0.25)] ring-1 ring-emerald-500/50 scale-[1.01]'
+                      : 'border-white/[0.08] bg-[#0A0815]/80 hover:border-white/20 opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-emerald-400 flex items-center space-x-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <ShieldCheck className="w-4 h-4" />
                       <span>The Sealed Envelope (u1...)</span>
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-                      MASKED
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                      state.radarPreview === 'shielded'
+                        ? 'bg-emerald-500 text-black'
+                        : 'bg-emerald-500/20 text-emerald-300'
+                    }`}>
+                      {state.radarPreview === 'shielded' ? '● ACTIVE ON RADAR' : 'MASKED'}
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-snug">
-                    Zero-Knowledge proofs confirm valid coins without revealing amounts or parties. Completely cloaked.
+                    Zero-Knowledge proofs verify valid coins without revealing amounts or identity. Completely cloaked.
                   </p>
                 </button>
+              </div>
+
+              <div className="text-[11px] text-zinc-400 text-center flex items-center justify-center space-x-1.5 pt-1">
+                <span>👉</span>
+                <span>Look at the <strong>Surveillance Radar</strong> to the right as you toggle between both cards</span>
               </div>
             </div>
 

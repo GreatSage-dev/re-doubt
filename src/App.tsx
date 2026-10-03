@@ -195,7 +195,7 @@ export const App: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-[#9C99B0]">
-                High-density zero-knowledge training environment · Real BIP-39 WebCrypto & ZIP-316 decoding.
+                Practice sandbox · Zero real money · Master your first shielded transaction with zero fear.
               </p>
             </div>
 

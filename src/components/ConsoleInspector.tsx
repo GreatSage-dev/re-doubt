@@ -31,6 +31,7 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
   const [activeTab, setActiveTab] = useState<'panopticon' | 'circuits' | 'zip316' | 'rpc'>('panopticon');
   const [customAddress, setCustomAddress] = useState('');
   const [copiedRpc, setCopiedRpc] = useState(false);
+  const [showTechnicalMatrix, setShowTechnicalMatrix] = useState(false);
 
   const decodedCustom = customAddress ? inspectZcashAddress(customAddress) : null;
   const latestTx = state.transactions[0];
@@ -232,58 +233,69 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
                 </div>
               )}
 
-              {/* Differential Matrix: Public Ledger vs Shielded Pool */}
+              {/* Differential Matrix: Public Ledger vs Shielded Pool (Collapsible for Beginners) */}
               <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/80 overflow-hidden">
-                <div className="px-4 py-2.5 border-b border-white/[0.08] bg-white/[0.02] flex items-center justify-between text-[11px] font-semibold text-[#ECEAF5]">
-                  <span>LEDGER SURVEILLANCE DIFFERENTIAL MATRIX</span>
-                  <span className="text-[10px] text-[#A69FC6]">ZIP-316 / ORCHARD SPEC</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTechnicalMatrix(!showTechnicalMatrix)}
+                  className="w-full px-4 py-2.5 border-b border-white/[0.08] bg-white/[0.02] flex items-center justify-between text-[11px] font-semibold text-[#ECEAF5] hover:bg-white/[0.04] transition cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[#D580FA]">🔬</span>
+                    <span>TECHNICAL RADAR DIFFERENTIAL MATRIX</span>
+                  </div>
+                  <span className="text-[10px] text-[#A69FC6] font-mono">
+                    {showTechnicalMatrix ? 'Hide Details ▲' : 'Inspect Details (ZIP-316 Spec) ▼'}
+                  </span>
+                </button>
 
-                <div className="divide-y divide-white/[0.06] text-[11px]">
-                  <div className="grid grid-cols-12 p-3 gap-2 items-center">
-                    <span className="col-span-4 text-zinc-400 font-medium">Sender Address</span>
-                    <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
-                      Exposed (t1CEX...)
-                    </span>
-                    <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
-                      Cloaked (0-Knowledge)
-                    </span>
+                {showTechnicalMatrix && (
+                  <div className="divide-y divide-white/[0.06] text-[11px] animate-fade-in">
+                    <div className="grid grid-cols-12 p-3 gap-2 items-center">
+                      <span className="col-span-4 text-zinc-400 font-medium">Sender Address</span>
+                      <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+                        Exposed (t1CEX...)
+                      </span>
+                      <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
+                        Cloaked (0-Knowledge)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-12 p-3 gap-2 items-center">
+                      <span className="col-span-4 text-zinc-400 font-medium">Recipient Target</span>
+                      <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+                        Exposed (t1...)
+                      </span>
+                      <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
+                        Masked (Viewing Key)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-12 p-3 gap-2 items-center">
+                      <span className="col-span-4 text-zinc-400 font-medium">Transacted Amount</span>
+                      <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+                        5.0000 ZEC (Public)
+                      </span>
+                      <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
+                        Hidden (Pedersen ZK)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-12 p-3 gap-2 items-center">
+                      <span className="col-span-4 text-zinc-400 font-medium">In-Band Memo</span>
+                      <span className="col-span-4 text-zinc-500">Unavailable / Leaked</span>
+                      <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
+                        512B Authenticated
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-12 p-3 gap-2 items-center">
+                      <span className="col-span-4 text-zinc-400 font-medium">Heuristic Linkability</span>
+                      <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+                        100% Graph Linkable
+                      </span>
+                      <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
+                        0.00% (Severed Pool)
+                      </span>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-12 p-3 gap-2 items-center">
-                    <span className="col-span-4 text-zinc-400 font-medium">Recipient Target</span>
-                    <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
-                      Exposed (t1...)
-                    </span>
-                    <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
-                      Masked (Viewing Key)
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-12 p-3 gap-2 items-center">
-                    <span className="col-span-4 text-zinc-400 font-medium">Transacted Amount</span>
-                    <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
-                      5.0000 ZEC (Public)
-                    </span>
-                    <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
-                      Hidden (Pedersen ZK)
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-12 p-3 gap-2 items-center">
-                    <span className="col-span-4 text-zinc-400 font-medium">In-Band Memo</span>
-                    <span className="col-span-4 text-zinc-500">Unavailable / Leaked</span>
-                    <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
-                      512B Authenticated
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-12 p-3 gap-2 items-center">
-                    <span className="col-span-4 text-zinc-400 font-medium">Heuristic Linkability</span>
-                    <span className={`col-span-4 ${!isShielded ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
-                      100% Graph Linkable
-                    </span>
-                    <span className={`col-span-4 ${isShielded ? 'text-emerald-400 font-bold' : 'text-zinc-500'}`}>
-                      0.00% (Severed Pool)
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Latest Broadcast Telemetry Card */}
