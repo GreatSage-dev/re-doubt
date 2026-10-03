@@ -67,9 +67,35 @@ npm test
 
 ---
 
-## Why the Sponsor is Load-Bearing
+## The Security Lab (Attack It and Watch It Win)
 
-* **Engine:** Built specifically on Zcash's multi-pool cryptographic architecture: Unified Addresses (ZIP 316), the Orchard zero-knowledge pool, and ZIP-302 encrypted memo fields.
+| Attack / Adversarial Vector | Engine Behavior | Verification Result |
+| :--- | :--- | :--- |
+| **Tampered Mnemonic Checksum** | Fails SHA-256 checksum verification against wordlist residue | **REJECTED (Valid: False)** |
+| **Mnemonic Type / Fuzz Attack** (`null`, numbers, wrong length) | Strict array and type validation guards against malformed buffers | **HALTED (Zero Runtime Throw)** |
+| **Address Spoofing / EVM Injection** (`0x...` or `bc1...`) | ZIP-316 parser strictly validates prefixes (`t1`, `t3`, `zs1`, `u1`) | **FLAGGED (Invalid Address)** |
+| **UTF-8 Multi-Byte Memo Overflow** (>512 bytes with 4-byte emojis) | Native `TextEncoder` byte calculation clamps at 512 bytes per ZIP-302 | **CLAMPED (Zero Buffer Crash)** |
+| **Telemetry Network Outage / CORS** | Cross-browser fallback controller falls back to cached checkpoint | **GRACEFUL (No UI Freeze)** |
+
+---
+
+## Why the Sponsor is Load-Bearing (Sponsor Ablation Proof)
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                            SPONSOR ABLATION MATRIX                                │
+├──────────────────────────────┬──────────────────────────┬────────────────────────┤
+│ METRIC                       │ WITH ZCASH ORCHARD POOL  │ WITHOUT ZCASH (BITCOIN/│
+│                              │ (LOAD-BEARING ENGINE)    │ TRANSPARENT EVM)       │
+├──────────────────────────────┼──────────────────────────┼────────────────────────┤
+│ Public Amount Visibility     │ 0 ZEC (Encrypted in ZK)  │ 100% Leaked on Ledger  │
+│ Sender/Receiver Linkability  │ Cryptographically Severed│ Graph Analysis Linked  │
+│ Encrypted Memo Support       │ 512-Byte Authenticated   │ 0 Bytes (Naked Calldata│
+│ Address Unification (ZIP-316)│ Unified Orchard/Sapling  │ Fragmented / Manual    │
+└──────────────────────────────┴──────────────────────────┴────────────────────────┘
+```
+
+* **Engine:** Built specifically on Zcash's multi-pool cryptographic architecture: Unified Addresses (ZIP-316), the Orchard zero-knowledge pool, and ZIP-302 encrypted memo fields.
 * **Patient:** Directly attacks the **Shielded Adoption Deficit**, converting transparent exchange holders into active shielded participants.
 * **Ecosystem Connection:** Directly tailored to [@zksnarks_](https://x.com/zksnarks_) to celebrate digital privacy culture and verifiable onboarding.
 
