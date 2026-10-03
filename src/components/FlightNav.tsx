@@ -9,16 +9,16 @@ interface FlightNavProps {
 }
 
 const STEPS = [
-  { id: 1 as FlightStepId, label: '1. Wallet Setup', icon: KeyRound, desc: 'BIP-39 Vault' },
-  { id: 2 as FlightStepId, label: '2. Getting ZEC', icon: ArrowDownToLine, desc: 'CEX Ingress (t-addr)' },
-  { id: 3 as FlightStepId, label: '3. Shielding', icon: ShieldAlert, desc: 'Orchard ZK Pool' },
-  { id: 4 as FlightStepId, label: '4. Sending', icon: Send, desc: 'z-to-z + Encrypted Memo' },
-  { id: 5 as FlightStepId, label: '5. Real Flight Plan', icon: Award, desc: 'Mobile Scan & Cert' },
+  { id: 1 as FlightStepId, num: '01', key: '1', label: 'BIP-39 Vault', icon: KeyRound, desc: 'Master Entropy' },
+  { id: 2 as FlightStepId, num: '02', key: '2', label: 'CEX Ingress', icon: ArrowDownToLine, desc: 'Public Leakage' },
+  { id: 3 as FlightStepId, num: '03', key: '3', label: 'Halo 2 Shield', icon: ShieldAlert, desc: 'Orchard ZK Pool' },
+  { id: 4 as FlightStepId, num: '04', key: '4', label: 'z-to-z Send', icon: Send, desc: '512B Memo' },
+  { id: 5 as FlightStepId, num: '05', key: '5', label: 'Mobile Verify', icon: Award, desc: 'ZIP-321 Mastery' },
 ];
 
 export const FlightNav: React.FC<FlightNavProps> = ({ currentStep, completedSteps, onSelectStep }) => {
   return (
-    <div className="bg-[#0E0C1C]/90 border border-white/[0.08] rounded-2xl p-2 my-4 backdrop-blur-xl">
+    <div className="bg-[#0E0C1C]/95 border border-white/[0.08] rounded-2xl p-2 my-4 backdrop-blur-xl shadow-[0_12px_30px_-10px_rgba(86,50,245,0.25)] select-none">
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         {STEPS.map((s) => {
           const Icon = s.icon;
@@ -29,7 +29,7 @@ export const FlightNav: React.FC<FlightNavProps> = ({ currentStep, completedStep
             <button
               key={s.id}
               onClick={() => onSelectStep(s.id)}
-              className={`flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-left transition duration-150 ${
+              className={`relative flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-left transition duration-150 cursor-pointer ${
                 isActive
                   ? 'bg-[#7738FF] text-white font-semibold shadow-lg shadow-[#7738FF]/35'
                   : isDone
@@ -45,14 +45,22 @@ export const FlightNav: React.FC<FlightNavProps> = ({ currentStep, completedStep
                   : 'bg-white/[0.05] text-[#8E8BA3]'
               }`}>
                 {isDone && !isActive ? (
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 ) : (
                   <Icon className="w-4 h-4" />
                 )}
               </div>
-              <div className="min-w-0">
-                <div className="text-xs font-medium truncate">{s.label}</div>
-                <div className={`text-[10px] truncate ${isActive ? 'text-black/80' : 'text-zinc-500'}`}>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium truncate">{s.label}</span>
+                  <span className={`text-[9px] font-mono px-1 py-0.2 rounded ${
+                    isActive ? 'bg-black/30 text-white/90' : 'bg-white/5 text-zinc-500'
+                  }`}>
+                    {s.key}
+                  </span>
+                </div>
+                <div className={`text-[10px] truncate ${isActive ? 'text-white/80' : 'text-zinc-500'}`}>
                   {s.desc}
                 </div>
               </div>
