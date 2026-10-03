@@ -43,7 +43,8 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   onLogEvent
 }) => {
   const [copied, setCopied] = useState(false);
-  const [showSeed, setShowSeed] = useState(true);
+  const [showSeed, setShowSeed] = useState(false);
+  const [showKeyDrill, setShowKeyDrill] = useState(false);
   const [isKeySaved, setIsKeySaved] = useState(false);
 
   // Time Capsule Send state (Step 4)
@@ -444,7 +445,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                 <span>FLIGHT INSTRUCTOR BRIEFING</span>
               </div>
               <p className="text-xs text-[#ECEAF5] leading-relaxed">
-                Notice the red alert on the radar: your 5.00 ZEC is currently visible to the entire world. Now let's slip it into the envelope. Shielding compiles a <strong>Halo 2 Zero-Knowledge Proof</strong> that verifies you have valid funds without revealing your balance or identity to the blockchain.
+                Look at the red radar on the right: your 5.00 ZEC is visible to anyone on the blockchain. Now let's slip it into the envelope. Shielding creates a mathematical zero-knowledge proof that hides your balance and identity from the world while proving the coins are 100% genuine.
               </p>
             </div>
 
@@ -452,7 +453,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
             <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
                 <span>Shielding Operation</span>
-                <span className="text-emerald-400 font-bold">Transparent → Orchard Pool</span>
+                <span className="text-emerald-400 font-bold">Public → Shielded Envelope</span>
               </div>
 
               <div className="space-y-2 text-[11px]">
@@ -465,8 +466,8 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   <span className="text-zinc-400">0.0001 ZEC</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-400">Zero-Knowledge Circuit:</span>
-                  <span className="text-[#D580FA]">Halo 2 PLONKish (Orchard)</span>
+                  <span className="text-zinc-400">Shielding Technology:</span>
+                  <span className="text-[#D580FA]">Zero-Knowledge Shield (Orchard)</span>
                 </div>
               </div>
 
@@ -474,7 +475,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
               {state.isShieldingInProgress && (
                 <div className="space-y-1.5 pt-2">
                   <div className="flex justify-between text-[10px] text-[#EBDEFA]">
-                    <span>Compiling Zero-Knowledge Proof...</span>
+                    <span>Sealing coins into the envelope...</span>
                     <span>{state.zkProofProgress}%</span>
                   </div>
                   <div className="w-full bg-black/60 rounded-full h-2 overflow-hidden border border-white/5">
@@ -608,71 +609,27 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
               </div>
             </div>
 
-            {/* Optional Practice 24-Word Master Key Vault */}
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
-                <div className="flex items-center space-x-1.5 font-sans">
-                  <Key className="w-3.5 h-3.5 text-[#D580FA]" />
-                  <span className="font-semibold text-white">Practice Recovery Key (24 Words)</span>
+            {/* Ready for Real Flight: Install Mobile Wallet */}
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-sans">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.06] pb-2.5 gap-2">
+                <div className="flex items-center space-x-1.5">
+                  <Download className="w-4 h-4 text-[#D580FA]" />
+                  <span className="text-xs font-semibold text-white">Next Step: Install Official Mobile Wallet</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setShowSeed(!showSeed)}
-                    className="text-zinc-400 hover:text-white text-[10px] flex items-center space-x-1 cursor-pointer"
-                  >
-                    {showSeed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    <span>{showSeed ? 'Hide' : 'Reveal'}</span>
-                  </button>
-                  <button
-                    onClick={() => handleCopy(state.seedPhrase.join(' '))}
-                    className="text-[#D580FA] hover:text-white text-[10px] flex items-center space-x-1 cursor-pointer"
-                  >
-                    {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                    <span>{copied ? 'Copied' : 'Copy'}</span>
-                  </button>
-                  <button
-                    onClick={handleRegenerateSeed}
-                    title="Generate new 24 words"
-                    className="text-zinc-400 hover:text-white p-1 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-zinc-400 font-sans leading-normal">
-                In real wallets like Zashi, your wallet generates a secret 24-word key like this. Write it down and never share it.
-              </p>
-
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 text-xs">
-                {state.seedPhrase.map((word, i) => (
-                  <div
-                    key={i}
-                    className="bg-black/40 px-2 py-1.5 rounded-lg border border-white/5 text-zinc-200 flex items-center justify-between"
-                  >
-                    <span className="text-zinc-500 text-[10px] font-mono">{i + 1}</span>
-                    <span className="truncate font-mono">{showSeed ? word : '••••'}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Wallet Profile Selection */}
-              <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[11px] font-sans">
-                <span className="text-zinc-400">Target Mobile Client:</span>
                 <div className="flex space-x-1.5">
                   <button
                     onClick={() => onUpdateState({ selectedWalletClient: 'zashi' })}
-                    className={`px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg border text-[11px] transition cursor-pointer ${
                       state.selectedWalletClient === 'zashi'
                         ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold'
                         : 'border-white/5 bg-black/20 text-zinc-400'
                     }`}
                   >
-                    Zashi (Official ECC)
+                    Zashi (Recommended)
                   </button>
                   <button
                     onClick={() => onUpdateState({ selectedWalletClient: 'ywallet' })}
-                    className={`px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg border text-[11px] transition cursor-pointer ${
                       state.selectedWalletClient === 'ywallet'
                         ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold'
                         : 'border-white/5 bg-black/20 text-zinc-400'
@@ -682,20 +639,94 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   </button>
                 </div>
               </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
+                {qrDataUrl && (
+                  <div className="bg-white p-2 rounded-xl shrink-0 shadow-lg">
+                    <img src={qrDataUrl} alt="ZIP-321 Payment URI QR Code" className="w-24 h-24" />
+                  </div>
+                )}
+                <div className="space-y-2 text-center sm:text-left flex-1">
+                  <p className="text-xs text-zinc-300 leading-snug">
+                    {state.selectedWalletClient === 'zashi'
+                      ? 'Zashi is the official shielded wallet created by Electric Coin Company (ECC). Pure, seamless privacy on iOS & Android.'
+                      : 'Ywallet is the high-performance power-user wallet for multi-account management and fast lightwalletd sync.'}
+                  </p>
+                  <a
+                    href={state.selectedWalletClient === 'zashi' ? 'https://zashi.org' : 'https://ywallet.app'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex py-2.5 px-4 bg-gradient-to-r from-[#5632F5] to-[#7738FF] hover:opacity-90 text-white rounded-xl text-xs font-semibold items-center justify-center space-x-2 transition shadow-[0_0_15px_rgba(86,50,245,0.3)]"
+                  >
+                    <span>Download Official {state.selectedWalletClient === 'zashi' ? 'Zashi' : 'Ywallet'}</span>
+                    <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                  </a>
+                </div>
+              </div>
             </div>
 
-            {/* Install Real Wallet Links */}
-            <div className="pt-1">
-              <a
-                href={state.selectedWalletClient === 'zashi' ? 'https://zashi.org' : 'https://ywallet.app'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 px-4 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition"
+            {/* Optional Practice Self-Custody Drill (Collapsible) */}
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 overflow-hidden font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setShowKeyDrill(!showKeyDrill)}
+                className="w-full px-4 py-3 bg-white/[0.02] hover:bg-white/[0.04] flex items-center justify-between text-zinc-300 transition cursor-pointer"
               >
-                <Download className="w-4 h-4 text-[#D580FA]" />
-                <span>Install Official Mobile Wallet ({state.selectedWalletClient === 'zashi' ? 'Zashi' : 'Ywallet'})</span>
-                <ExternalLink className="w-3.5 h-3.5 text-zinc-400 ml-1" />
-              </a>
+                <div className="flex items-center space-x-2 font-sans">
+                  <Key className="w-3.5 h-3.5 text-[#D580FA]" />
+                  <span className="font-semibold text-white">Self-Custody Practice Drill (Optional 24 Words)</span>
+                </div>
+                <span className="text-[11px] text-[#A69FC6] font-sans">
+                  {showKeyDrill ? 'Hide Practice Words ▲' : 'Inspect Practice Words ▼'}
+                </span>
+              </button>
+
+              {showKeyDrill && (
+                <div className="p-4 space-y-3 border-t border-white/[0.06] animate-fade-in">
+                  <p className="text-[11px] text-zinc-400 font-sans leading-normal">
+                    When you set up a real self-custody wallet like Zashi, it will generate a 24-word secret recovery phrase like this. You write it down on paper and store it securely.
+                  </p>
+
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
+                    <span className="text-[10px] text-zinc-500 font-sans">Simulated BIP-39 CSPRNG Key</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setShowSeed(!showSeed)}
+                        className="text-zinc-400 hover:text-white text-[10px] flex items-center space-x-1 cursor-pointer"
+                      >
+                        {showSeed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        <span>{showSeed ? 'Hide' : 'Reveal'}</span>
+                      </button>
+                      <button
+                        onClick={() => handleCopy(state.seedPhrase.join(' '))}
+                        className="text-[#D580FA] hover:text-white text-[10px] flex items-center space-x-1 cursor-pointer"
+                      >
+                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{copied ? 'Copied' : 'Copy'}</span>
+                      </button>
+                      <button
+                        onClick={handleRegenerateSeed}
+                        title="Generate new 24 words"
+                        className="text-zinc-400 hover:text-white p-1 cursor-pointer"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 text-xs">
+                    {state.seedPhrase.map((word, i) => (
+                      <div
+                        key={i}
+                        className="bg-black/40 px-2 py-1.5 rounded-lg border border-white/5 text-zinc-200 flex items-center justify-between"
+                      >
+                        <span className="text-zinc-500 text-[10px] font-mono">{i + 1}</span>
+                        <span className="truncate font-mono">{showSeed ? word : '••••'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
