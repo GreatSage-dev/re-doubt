@@ -4,7 +4,7 @@
 > *In collaboration with [@zksnarks_](https://x.com/zksnarks_)*
 
 ```
-VAULT → INGRESS (t-addr) → SHIELD (Halo 2) → CLOAK (z-to-z) → CERTIFY
+COMPARE (Postcard vs Envelope) → INGRESS (t1...) → SHIELD (u1...) → DISPATCH (ZIP-302) → GRADUATE (Zashi/Ywallet)
 ```
 
 ---
@@ -20,38 +20,39 @@ Over **80% of Zcash transactions remain nakedly transparent** on public ledgers 
 
 ## Dual Ingress Paths (For Judges)
 
-### Path A: The 15-Second Tactile Experience
-1. Open the interactive web application in your browser.
-2. Select your client (**Zashi** or **Ywallet**) and generate a real BIP-39 cryptographic seed.
-3. Simulate a CEX withdrawal: watch the **Panopticon Surveillance Mirror** on the right flash RED as your balance and transaction history leak publicly.
-4. Click **"Shield to Orchard Pool"**: watch the Halo 2 zero-knowledge proof compile live, cloaking the ledger into ciphertext.
-5. Complete the flight training to unlock your verified **Shielded Flight Certificate** and a real-world scannable **ZIP-321 QR code**.
+### Path A: The 90-Second Tactile Experience (Live Web)
+1. Open the interactive flight deck at **[re-doubt-pi.vercel.app](https://re-doubt-pi.vercel.app)**.
+2. **Phase 1 (Radar Check):** Flip between the Public Postcard (`t1...`) and the Sealed Envelope (`u1...`) to watch the live Surveillance Radar react in real time.
+3. **Phase 2 (Practice Coins):** Claim 5.00 mock ZEC from a simulated CEX into a transparent address and watch the public ledger flash RED.
+4. **Phase 3 (Shield Funds):** Click *"Shield 5.00 ZEC (Make It Invisible)"* to seal funds into the Orchard pool and watch the radar turn emerald green.
+5. **Phase 4 (Encrypted Memo):** Transmit a confidential sealed dispatch (ZIP-302 authenticated memo) with live dual-reality inspection (What You See vs What Public Surveillance Sees).
+6. **Phase 5 (Graduate):** Claim your verified **Flight Certificate (`ZEC-ORCHARD-...`)**, optionally test-drive the 24-word self-custody drill, and scan the **ZIP-321 QR code** into official mobile wallets (**Zashi** / **Ywallet**).
 
-### Path B: The Sub-Second Deterministic Proof
+### Path B: The Sub-Second Deterministic Proof (Terminal)
 Run the deterministic cryptographic test harness directly in your terminal:
 ```bash
 npm test
 ```
-*Output (Executed in < 30ms):*
+*Output (Executed in < 40ms):*
 ```text
- ✓ src/test/simulator.test.ts (5 tests) 27ms
+ ✓ src/test/simulator.test.ts (7 tests) 34ms
 
  Test Files  1 passed (1)
-      Tests  5 passed (5)
-   Duration  1.54s (tests 27ms)
+      Tests  7 passed (7)
+   Duration  1.41s (tests 34ms)
 ```
 
 ---
 
 ## The 5 Required Bounty Milestones (100% Covered)
 
-| Step | Bounty Requirement | How REDOUBT Delivers It |
+| Bounty Milestone | Product Phase | How REDOUBT Delivers It |
 | :--- | :--- | :--- |
-| **1. Wallet Setup** | Choosing client & seed security | Real Web Crypto BIP-39 entropy generator (24 words) with interactive backup challenge and client comparison (Zashi vs Ywallet). |
-| **2. Getting ZEC** | Buying & withdrawing | Simulated CEX withdrawal to a transparent address (`t1...`). Explains why exchanges default to transparent and how chain analysis monitors them. |
-| **3. Shielding & Unshielding** | Postcard vs. Envelope analogy | Dual-balance ledger with live animated Halo 2 zero-knowledge circuit compilation. Explains why unshielding leaks metadata. |
-| **4. Sending & Receiving** | Private z-to-z transfers | Sends a cloaked transaction with an encrypted memo (ZIP-302 / ZIP-321) into a Unified Address (`u1...`). |
-| **5. Real Flight Plan** | First real shielded transaction | Generates real scannable ZIP-321 QR codes for mobile wallets, links to official downloads, and issues a shareable Flight Certificate for X. |
+| **1. Postcard vs. Envelope Analogy** | **Phase 1: Radar Check** | Interactive dual-state toggle: visualizes transparent exposure (`t1...`) vs. zero-knowledge cloaking (`u1...`) before touching any coins. |
+| **2. Getting ZEC (Exchange Ingress)** | **Phase 2: Practice ZEC** | 1-click simulated CEX withdrawal to a transparent address (`t1...`). Teaches why exchanges default to public ledgers and how graph analytics link identities. |
+| **3. Shielding Funds (Public → Private)** | **Phase 3: Shield Funds** | 1-click shield into the Orchard pool with animated proof compilation. The Surveillance Radar flashes from blood red to emerald green. |
+| **4. Sending & Receiving Private Memos** | **Phase 4: Encrypted Memo** | Transmits a confidential sealed dispatch inside an authenticated 512-byte payload (ZIP-302) with live dual-reality viewport. |
+| **5. Wallet Setup & Real Flight Plan** | **Phase 5: Graduate** | Issues an on-chain style Flight Certificate for X, provides an optional BIP-39 CSPRNG 24-word self-custody drill, generates live ZIP-321 QR codes, and deep-links to Zashi / Ywallet. |
 
 ---
 
