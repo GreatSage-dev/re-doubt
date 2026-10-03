@@ -25,7 +25,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ isOpen, onCl
 
   const certId = 'ZEC-ORCHARD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
   const tweetText = encodeURIComponent(
-    `I just completed the Zero-to-Shielded Flight Simulator on SHADOW-RUN! 🛡️⚡\n\nTested wallet vaulting, CEX transparent ingress, and Orchard zero-knowledge shielding with zero risk before touching real funds.\n\nReady for Zcash privacy. cc @zksnarks_ #ZECATHON`
+    `I just completed the Zero-to-Shielded Flight Simulator on REDOUBT! 🛡️⚡\n\nTested wallet vaulting, CEX transparent ingress, and Orchard zero-knowledge shielding with zero risk before touching real funds.\n\nReady for Zcash privacy. cc @zksnarks_ #ZECATHON`
   );
 
   return (

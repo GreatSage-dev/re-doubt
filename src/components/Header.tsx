@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ networkStatus, activeView, onNav
             <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#5632F5] text-[13px] font-semibold text-white">
               Z
             </span>
-            <span className="text-[14px] font-medium tracking-[-0.01em] text-[#ECEAF5]">Shadow-Run</span>
+            <span className="text-[14px] font-medium tracking-[-0.01em] text-[#ECEAF5]">Redoubt</span>
           </button>
 
           <nav className="hidden items-center gap-1 text-[13px] sm:flex">

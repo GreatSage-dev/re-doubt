@@ -51,7 +51,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   // Send state
   const [recipientInput, setRecipientInput] = useState(CANONICAL_TEST_ADDRESSES.UNIFIED_ORCHARD_SAMPLE);
   const [sendAmount, setSendAmount] = useState('1.00');
-  const [sendMemo, setSendMemo] = useState('Payment from Shadow-Run flight simulator 🚀');
+  const [sendMemo, setSendMemo] = useState('Payment from Redoubt flight simulator 🚀');
   const [isSending, setIsSending] = useState(false);
 
   // QR Code for Step 5

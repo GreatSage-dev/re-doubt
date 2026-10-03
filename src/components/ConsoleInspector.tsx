@@ -75,7 +75,7 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
             [{
               address: CANONICAL_TEST_ADDRESSES.UNIFIED_ORCHARD_SAMPLE,
               amount: 1.0,
-              memo: textToHex("Payment from Shadow-Run flight simulator 🚀")
+              memo: textToHex("Payment from Redoubt flight simulator 🚀")
             }],
             1,
             0.0001

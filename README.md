@@ -1,4 +1,4 @@
-# SHADOW-RUN 🛡️⚡
+# REDOUBT 🛡️⚡
 ### The Zcash Zero-Risk Flight Simulator & Interactive Onboarding Engine
 > **Built for the ZECATHON ($100k Zcash Privacy Hackathon) — Wildcard Track**  
 > *In collaboration with [@zksnarks_](https://x.com/zksnarks_)*
@@ -14,7 +14,7 @@ VAULT → INGRESS (t-addr) → SHIELD (Halo 2) → CLOAK (z-to-z) → CERTIFY
 
 Over **80% of Zcash transactions remain nakedly transparent** on public ledgers because new users are paralyzed by fear of making an irreversible mistake. 
 
-**SHADOW-RUN** is the aviation flight simulator for Zcash. It gives beginners somatic muscle memory in 90 seconds through a dual-cylinder interactive cockpit—letting them test-drive wallet vaulting, exchange ingress, and zero-knowledge shielding with zero risk before touching a single cent.
+**REDOUBT** is the aviation flight simulator for Zcash. It gives beginners somatic muscle memory in 90 seconds through a dual-cylinder interactive cockpit—letting them test-drive wallet vaulting, exchange ingress, and zero-knowledge shielding with zero risk before touching a single cent.
 
 ---
 
@@ -45,7 +45,7 @@ npm test
 
 ## The 5 Required Bounty Milestones (100% Covered)
 
-| Step | Bounty Requirement | How SHADOW-RUN Delivers It |
+| Step | Bounty Requirement | How REDOUBT Delivers It |
 | :--- | :--- | :--- |
 | **1. Wallet Setup** | Choosing client & seed security | Real Web Crypto BIP-39 entropy generator (24 words) with interactive backup challenge and client comparison (Zashi vs Ywallet). |
 | **2. Getting ZEC** | Buying & withdrawing | Simulated CEX withdrawal to a transparent address (`t1...`). Explains why exchanges default to transparent and how chain analysis monitors them. |

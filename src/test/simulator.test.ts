@@ -9,7 +9,7 @@ import {
   CANONICAL_TEST_ADDRESSES 
 } from '../crypto/zcash';
 
-describe('SHADOW-RUN: Deterministic Cryptography & Security Audit Verifier', () => {
+describe('REDOUBT: Deterministic Cryptography & Security Audit Verifier', () => {
 
   it('1. Cryptographic Vault: Generates real 24-word BIP-39 seed with valid SHA-256 checksum', async () => {
     const startTime = performance.now();

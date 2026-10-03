@@ -59,7 +59,7 @@ export const HeroPortal: React.FC<HeroPortalProps> = ({ onEnterConsole }) => {
           </h1>
 
           <p className="mx-auto mt-5 max-w-[560px] text-[16px] leading-[1.6] text-[#9C99B0]">
-            Shadow-Run lets you rehearse wallet setup, exchange withdrawals and Orchard shielding with real
+            Redoubt lets you rehearse wallet setup, exchange withdrawals and Orchard shielding with real
             cryptography, before a single real ZEC moves.
           </p>
         </div>
