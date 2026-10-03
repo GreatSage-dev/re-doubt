@@ -21,12 +21,18 @@ export function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-// Convert string memo to ZIP-321 base64 format (max 512 bytes)
+// Calculate UTF-8 byte length for memo
+export function getMemoByteLength(memoText: string): number {
+  if (!memoText) return 0;
+  return new TextEncoder().encode(memoText).length;
+}
+
+// Convert string memo to ZIP-321 base64 format (max 512 bytes, safely clamps if exceeded)
 export function encodeMemoToZip321(memoText: string): string {
   const encoder = new TextEncoder();
-  const bytes = encoder.encode(memoText);
+  let bytes = encoder.encode(memoText);
   if (bytes.length > 512) {
-    throw new Error('Memo exceeds Zcash 512-byte shielded limit');
+    bytes = bytes.slice(0, 512);
   }
   // ZIP-321 expects URL-safe base64 or standard base64 without padding in query params
   return bytesToBase64(bytes)

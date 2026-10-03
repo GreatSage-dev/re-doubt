@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Shield, 
   ArrowRight, 
@@ -25,7 +25,7 @@ import {
 import QRCode from 'qrcode';
 import { FlightStepId, SimulatorState } from '../types';
 import { generateRealMnemonic } from '../crypto/bip39';
-import { buildZip321Uri, CANONICAL_TEST_ADDRESSES } from '../crypto/zcash';
+import { buildZip321Uri, CANONICAL_TEST_ADDRESSES, getMemoByteLength, inspectZcashAddress } from '../crypto/zcash';
 
 interface ConsoleCockpitProps {
   state: SimulatorState;
@@ -57,6 +57,16 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   // QR Code for Step 5
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
+  // Active timers reference to prevent memory leaks on unmount
+  const timersRef = useRef<{ interval?: ReturnType<typeof setInterval>; timeout?: ReturnType<typeof setTimeout> }>({});
+
+  useEffect(() => {
+    return () => {
+      if (timersRef.current.interval) clearInterval(timersRef.current.interval);
+      if (timersRef.current.timeout) clearTimeout(timersRef.current.timeout);
+    };
+  }, []);
+
   useEffect(() => {
     if (state.currentStep === 5) {
       const uri = buildZip321Uri({
@@ -84,11 +94,15 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   const handleRegenerateSeed = async () => {
     const { mnemonic } = await generateRealMnemonic(256);
     onUpdateState({ seedPhrase: mnemonic, isSeedBackedUp: false });
+    setQuizWordIndex(Math.floor(Math.random() * 24));
+    setQuizInput('');
+    setQuizError(false);
     onLogEvent('BIP-39', 'Generated 256-bit fresh CSPRNG mnemonic (24 words)', 'info');
   };
 
   const handleVerifySeedQuiz = () => {
     const targetWord = state.seedPhrase[quizWordIndex];
+    if (!targetWord) return;
     if (quizInput.trim().toLowerCase() === targetWord.toLowerCase()) {
       onUpdateState({ isSeedBackedUp: true });
       setQuizError(false);
@@ -128,23 +142,27 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
 
   // Step 3: Orchard Shielding
   const handleExecuteShielding = () => {
+    if (state.transparentBalance <= 0 || state.isShieldingInProgress) return;
+
     onUpdateState({ isShieldingInProgress: true, zkProofProgress: 10 });
     onLogEvent('HALO2', 'Initiating Halo 2 circuit synthesis (20,480 constraints)...', 'circuit');
 
-    const interval = setInterval(() => {
-      onUpdateState({
-        zkProofProgress: Math.min(100, state.zkProofProgress + 30)
-      });
-    }, 280);
+    let currentProgress = 10;
+    timersRef.current.interval = setInterval(() => {
+      currentProgress = Math.min(95, currentProgress + 25);
+      onUpdateState({ zkProofProgress: currentProgress });
+    }, 250);
 
-    setTimeout(() => {
-      clearInterval(interval);
+    const transparentToShield = state.transparentBalance;
+
+    timersRef.current.timeout = setTimeout(() => {
+      if (timersRef.current.interval) clearInterval(timersRef.current.interval);
       const txId = 'tx_shield_' + Math.random().toString(36).substring(2, 9);
       const shieldTx = {
         id: txId,
         timestamp: Date.now(),
         type: 'shield_to_orchard' as const,
-        amount: state.transparentBalance,
+        amount: transparentToShield,
         fee: 0.0001,
         sender: state.transparentAddress,
         recipient: state.unifiedAddress + ' (Orchard Pool)',
@@ -158,25 +176,28 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
         isShieldingInProgress: false,
         zkProofProgress: 100,
         transparentBalance: 0,
-        shieldedBalance: state.transparentBalance - 0.0001,
+        shieldedBalance: Math.max(0, transparentToShield - 0.0001),
         transactions: [shieldTx, ...state.transactions]
       });
 
-      onLogEvent('HALO2', `Proof compiled in 27ms! Sinsemilla Merkle tree commit generated.`, 'success');
-      onLogEvent('ORCHARD', `Transferred 4.9999 ZEC into Orchard Pool. Address & balance cloaked.`, 'success');
+      onLogEvent('HALO2', 'Proof compiled in 27ms! Sinsemilla Merkle tree commit generated.', 'success');
+      onLogEvent('ORCHARD', `Transferred ${(transparentToShield - 0.0001).toFixed(4)} ZEC into Orchard Pool. Address & balance cloaked.`, 'success');
       onAdvanceStep(4);
-    }, 1200);
+    }, 1100);
   };
 
   // Step 4: z-to-z Send
   const handleSendShielded = () => {
-    const amt = parseFloat(sendAmount) || 1.0;
-    if (amt > state.shieldedBalance) return;
+    const amt = parseFloat(sendAmount);
+    const memoBytes = getMemoByteLength(sendMemo);
+    if (isNaN(amt) || amt <= 0 || amt > state.shieldedBalance - 0.0001 || memoBytes > 512 || isSending) {
+      return;
+    }
 
     setIsSending(true);
-    onLogEvent('HALO2', `Constructing Action transfer for ${amt} ZEC with 512B in-band memo...`, 'circuit');
+    onLogEvent('HALO2', `Constructing Action transfer for ${amt.toFixed(4)} ZEC with ${memoBytes}B in-band memo...`, 'circuit');
 
-    setTimeout(() => {
+    timersRef.current.timeout = setTimeout(() => {
       setIsSending(false);
       const txId = 'tx_z2z_' + Math.random().toString(36).substring(2, 9);
       const sendTx = {
@@ -194,7 +215,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
       };
 
       onUpdateState({
-        shieldedBalance: state.shieldedBalance - amt - 0.0001,
+        shieldedBalance: Math.max(0, state.shieldedBalance - amt - 0.0001),
         transactions: [sendTx, ...state.transactions]
       });
 
@@ -518,21 +539,32 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   <Lock className="w-3.5 h-3.5 text-[#D580FA]" />
                   <span>512-Byte In-Band Encrypted Memo (ZIP-302)</span>
                 </span>
-                <span className="text-[10px] text-zinc-500">{sendMemo.length} / 512 bytes</span>
+                <span className={`text-[10px] ${getMemoByteLength(sendMemo) > 512 ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+                  {getMemoByteLength(sendMemo)} / 512 bytes {getMemoByteLength(sendMemo) > 512 && '(Exceeds limit!)'}
+                </span>
               </div>
               <textarea
                 rows={2}
                 value={sendMemo}
                 onChange={(e) => setSendMemo(e.target.value)}
-                className="w-full bg-[#0A0815] border border-white/[0.1] rounded-xl p-2.5 text-xs text-zinc-200 resize-none focus:border-[#7738FF] focus:outline-none"
+                className={`w-full bg-[#0A0815] border rounded-xl p-2.5 text-xs text-zinc-200 resize-none focus:outline-none ${
+                  getMemoByteLength(sendMemo) > 512 ? 'border-rose-500/50' : 'border-white/[0.1] focus:border-[#7738FF]'
+                }`}
               />
             </div>
 
             {/* Send Button */}
             <button
               onClick={handleSendShielded}
-              disabled={isSending || state.shieldedBalance <= 0}
-              className="w-full py-3 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] disabled:opacity-50 cursor-pointer"
+              disabled={
+                isSending || 
+                state.shieldedBalance <= 0 || 
+                getMemoByteLength(sendMemo) > 512 || 
+                isNaN(parseFloat(sendAmount)) || 
+                parseFloat(sendAmount) <= 0 || 
+                parseFloat(sendAmount) > state.shieldedBalance - 0.0001
+              }
+              className="w-full py-3 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] disabled:opacity-40 cursor-pointer"
             >
               {isSending ? (
                 <>

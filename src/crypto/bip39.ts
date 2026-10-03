@@ -263,13 +263,14 @@ export async function generateRealMnemonic(strength: 128 | 256 = 256): Promise<{
 
 // Validate a user-entered mnemonic
 export async function validateMnemonic(mnemonicWords: string[]): Promise<boolean> {
-  if (mnemonicWords.length !== 12 && mnemonicWords.length !== 24) {
+  if (!Array.isArray(mnemonicWords) || (mnemonicWords.length !== 12 && mnemonicWords.length !== 24)) {
     return false;
   }
 
   // Find word indices
   const indices: number[] = [];
   for (const word of mnemonicWords) {
+    if (!word || typeof word !== 'string') return false;
     const idx = BIP39_ENGLISH_WORDLIST.indexOf(word.toLowerCase().trim());
     if (idx === -1) return false;
     indices.push(idx);

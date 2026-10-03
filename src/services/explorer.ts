@@ -4,12 +4,19 @@ import { NetworkStatus } from '../types';
  * Service to connect to live public Zcash block explorer and RPC endpoints.
  * Fallback to verified mainnet checkpoint if rate-limited or offline.
  */
+function createTimeoutSignal(ms: number): AbortSignal | undefined {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms);
+  }
+  return undefined;
+}
+
 export async function fetchLiveZcashStatus(): Promise<NetworkStatus> {
   try {
     // Attempt query to Blockchair public Zcash stats API
     const response = await fetch('https://api.blockchair.com/zcash/stats', {
       headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(4000)
+      signal: createTimeoutSignal(4000)
     });
 
     if (response.ok) {
@@ -48,7 +55,7 @@ export async function checkTransparentAddressOnChain(address: string): Promise<{
 }> {
   try {
     const res = await fetch(`https://api.blockchair.com/zcash/dashboards/address/${address}?limit=1`, {
-      signal: AbortSignal.timeout(3500)
+      signal: createTimeoutSignal(3500)
     });
     if (res.ok) {
       const data = await res.json();

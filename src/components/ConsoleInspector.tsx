@@ -22,6 +22,11 @@ interface ConsoleInspectorProps {
   state: SimulatorState;
 }
 
+function textToHex(text: string): string {
+  const bytes = new TextEncoder().encode(text);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'panopticon' | 'circuits' | 'zip316' | 'rpc'>('panopticon');
   const [customAddress, setCustomAddress] = useState('');
@@ -70,7 +75,7 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
             [{
               address: CANONICAL_TEST_ADDRESSES.UNIFIED_ORCHARD_SAMPLE,
               amount: 1.0,
-              memo: Buffer.from("Payment from Shadow-Run flight simulator 🚀").toString('hex')
+              memo: textToHex("Payment from Shadow-Run flight simulator 🚀")
             }],
             1,
             0.0001
@@ -358,7 +363,7 @@ export const ConsoleInspector: React.FC<ConsoleInspectorProps> = ({ state }) => 
                       <div className="text-[9px] text-zinc-400">Sapling (0x02)</div>
                       <div className="font-bold text-xs mt-0.5">{decodedCustom.receivers.sapling ? 'ACTIVE' : 'NONE'}</div>
                     </div>
-                    <div className={`p-2 rounded-xl border ${decodedCustom.receivers.transparent ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-black/30 border-white/5 text-zinc-600'}`}>
+                    <div className={`p-2 rounded-xl border ${decodedCustom.receivers.transparent ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-black/30 border-white/5 text-zinc-600'}`}>
                       <div className="text-[9px] text-zinc-400">Transparent (0x00)</div>
                       <div className="font-bold text-xs mt-0.5">{decodedCustom.receivers.transparent ? 'ACTIVE' : 'NONE'}</div>
                     </div>
