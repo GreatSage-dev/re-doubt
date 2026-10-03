@@ -1,5 +1,4 @@
-import React from 'react';
-import { KeyRound, ArrowDownToLine, ShieldAlert, Send, Award, CheckCircle2 } from 'lucide-react';
+import { Eye, ArrowDownToLine, ShieldCheck, Mail, KeyRound, Award, CheckCircle2 } from 'lucide-react';
 import { FlightStepId } from '../types';
 
 interface FlightNavProps {
@@ -9,11 +8,11 @@ interface FlightNavProps {
 }
 
 const STEPS = [
-  { id: 1 as FlightStepId, num: '01', key: '1', label: 'BIP-39 Vault', icon: KeyRound, desc: 'Master Entropy' },
-  { id: 2 as FlightStepId, num: '02', key: '2', label: 'CEX Ingress', icon: ArrowDownToLine, desc: 'Public Leakage' },
-  { id: 3 as FlightStepId, num: '03', key: '3', label: 'Halo 2 Shield', icon: ShieldAlert, desc: 'Orchard ZK Pool' },
-  { id: 4 as FlightStepId, num: '04', key: '4', label: 'z-to-z Send', icon: Send, desc: '512B Memo' },
-  { id: 5 as FlightStepId, num: '05', key: '5', label: 'Mobile Verify', icon: Award, desc: 'ZIP-321 Mastery' },
+  { id: 1 as FlightStepId, num: '01', key: '1', label: '1. Radar Check', icon: Eye, desc: 'See the Contrast' },
+  { id: 2 as FlightStepId, num: '02', key: '2', label: '2. Practice ZEC', icon: ArrowDownToLine, desc: 'Exchange Ingress' },
+  { id: 3 as FlightStepId, num: '03', key: '3', label: '3. Shield Funds', icon: ShieldCheck, desc: 'Orchard ZK Pool' },
+  { id: 4 as FlightStepId, num: '04', key: '4', label: '4. Time Capsule', icon: Mail, desc: 'Encrypted Memo' },
+  { id: 5 as FlightStepId, num: '05', key: '5', label: '5. Graduate', icon: KeyRound, desc: 'Key Vault & QR' },
 ];
 
 export const FlightNav: React.FC<FlightNavProps> = ({ currentStep, completedSteps, onSelectStep }) => {

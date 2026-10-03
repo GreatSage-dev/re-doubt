@@ -4,28 +4,28 @@ import {
   ArrowRight, 
   Copy, 
   Check, 
-  Smartphone, 
   RefreshCw, 
   Eye, 
   EyeOff, 
   Lock, 
   Mail, 
-  FileText, 
   Sparkles,
   QrCode,
   Download,
-  AlertCircle,
   ExternalLink,
   Award,
-  Terminal,
-  Zap,
   Key,
-  Layers
+  Layers,
+  Radio,
+  ArrowDownToLine,
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { FlightStepId, SimulatorState } from '../types';
 import { generateRealMnemonic } from '../crypto/bip39';
-import { buildZip321Uri, CANONICAL_TEST_ADDRESSES, getMemoByteLength, inspectZcashAddress } from '../crypto/zcash';
+import { buildZip321Uri, CANONICAL_TEST_ADDRESSES, getMemoByteLength } from '../crypto/zcash';
 
 interface ConsoleCockpitProps {
   state: SimulatorState;
@@ -43,15 +43,12 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   onLogEvent
 }) => {
   const [copied, setCopied] = useState(false);
-  const [showSeed, setShowSeed] = useState(false);
-  const [quizWordIndex, setQuizWordIndex] = useState(6);
-  const [quizInput, setQuizInput] = useState('');
-  const [quizError, setQuizError] = useState(false);
+  const [showSeed, setShowSeed] = useState(true);
+  const [isKeySaved, setIsKeySaved] = useState(false);
 
-  // Send state
-  const [recipientInput, setRecipientInput] = useState(CANONICAL_TEST_ADDRESSES.UNIFIED_ORCHARD_SAMPLE);
-  const [sendAmount, setSendAmount] = useState('1.00');
-  const [sendMemo, setSendMemo] = useState('Payment from Redoubt flight simulator 🚀');
+  // Time Capsule Send state (Step 4)
+  const defaultLetter = 'Dear future me: Privacy is an inviolable human right. This letter was sealed with Zero-Knowledge proofs on Zcash.';
+  const [sendMemo, setSendMemo] = useState(defaultLetter);
   const [isSending, setIsSending] = useState(false);
 
   // QR Code for Step 5
@@ -67,12 +64,13 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
     };
   }, []);
 
+  // Update QR Code whenever on Step 5
   useEffect(() => {
     if (state.currentStep === 5) {
       const uri = buildZip321Uri({
         address: state.unifiedAddress || CANONICAL_TEST_ADDRESSES.UNIFIED_ORCHARD_SAMPLE,
         amount: 0.05,
-        memo: 'Hello Zcash Shielded World - @zksnarks_'
+        memo: state.practiceMemo || sendMemo
       });
       QRCode.toDataURL(uri, {
         width: 240,
@@ -83,7 +81,7 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
         }
       }).then(setQrDataUrl).catch(() => {});
     }
-  }, [state.currentStep, state.unifiedAddress]);
+  }, [state.currentStep, state.unifiedAddress, state.practiceMemo, sendMemo]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -94,28 +92,21 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
   const handleRegenerateSeed = async () => {
     const { mnemonic } = await generateRealMnemonic(256);
     onUpdateState({ seedPhrase: mnemonic, isSeedBackedUp: false });
-    setQuizWordIndex(Math.floor(Math.random() * 24));
-    setQuizInput('');
-    setQuizError(false);
     onLogEvent('BIP-39', 'Generated 256-bit fresh CSPRNG mnemonic (24 words)', 'info');
   };
 
-  const handleVerifySeedQuiz = () => {
-    const targetWord = state.seedPhrase[quizWordIndex];
-    if (!targetWord) return;
-    if (quizInput.trim().toLowerCase() === targetWord.toLowerCase()) {
-      onUpdateState({ isSeedBackedUp: true });
-      setQuizError(false);
-      onLogEvent('BIP-39', `Verified seed backup challenge for word #${quizWordIndex + 1}`, 'success');
-      onAdvanceStep(2);
-    } else {
-      setQuizError(true);
-      onLogEvent('BIP-39', `Failed seed backup verification (input "${quizInput}")`, 'warn');
-    }
+  // ── Step 1: Radar Check Toggle ──────────────────────────────────────────
+  const handleToggleRadarPreview = (mode: 'transparent' | 'shielded') => {
+    onUpdateState({ radarPreview: mode });
+    onLogEvent(
+      mode === 'transparent' ? 'MEMPOOL' : 'HALO2',
+      `Switched radar preview to ${mode.toUpperCase()} view (${mode === 'transparent' ? 'The Postcard' : 'The Envelope'})`,
+      mode === 'transparent' ? 'warn' : 'circuit'
+    );
   };
 
-  // Step 2: CEX Ingress
-  const handleCexWithdraw = () => {
+  // ── Step 2: Claim Practice Coins (Exchange Ingress) ────────────────────
+  const handleClaimPracticeCoins = () => {
     const txId = 'tx_cex_' + Math.random().toString(36).substring(2, 9);
     const newTx = {
       id: txId,
@@ -132,15 +123,16 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
 
     onUpdateState({
       transparentBalance: state.transparentBalance + 5.0,
-      transactions: [newTx, ...state.transactions]
+      transactions: [newTx, ...state.transactions],
+      radarPreview: 'transparent'
     });
 
     onLogEvent('MEMPOOL', `Simulated CEX withdrawal of 5.000 ZEC to ${state.transparentAddress.substring(0, 14)}...`, 'warn');
-    onLogEvent('MEMPOOL', `ALERT: Balance 5.000 ZEC now 100% visible on public block explorer`, 'warn');
+    onLogEvent('MEMPOOL', `ALERT: Balance 5.000 ZEC is now 100% visible on public block explorer`, 'warn');
     onAdvanceStep(3);
   };
 
-  // Step 3: Orchard Shielding
+  // ── Step 3: Orchard Shielding (Halo 2 Circuit) ─────────────────────────
   const handleExecuteShielding = () => {
     if (state.transparentBalance <= 0 || state.isShieldingInProgress) return;
 
@@ -158,56 +150,51 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
     timersRef.current.timeout = setTimeout(() => {
       if (timersRef.current.interval) clearInterval(timersRef.current.interval);
       const txId = 'tx_shield_' + Math.random().toString(36).substring(2, 9);
-      const shieldTx = {
+      const newTx = {
         id: txId,
         timestamp: Date.now(),
         type: 'shield_to_orchard' as const,
         amount: transparentToShield,
         fee: 0.0001,
         sender: state.transparentAddress,
-        recipient: state.unifiedAddress + ' (Orchard Pool)',
-        memo: 'Auto-Shielded via Halo 2 Circuit',
+        recipient: state.unifiedAddress,
         status: 'confirmed' as const,
         proofType: 'halo2_orchard_zk' as const,
         isSurveillanceVisible: false
       };
 
       onUpdateState({
+        transparentBalance: 0,
+        shieldedBalance: Math.max(0, state.shieldedBalance + transparentToShield - 0.0001),
         isShieldingInProgress: false,
         zkProofProgress: 100,
-        transparentBalance: 0,
-        shieldedBalance: Math.max(0, transparentToShield - 0.0001),
-        transactions: [shieldTx, ...state.transactions]
+        transactions: [newTx, ...state.transactions],
+        radarPreview: 'shielded'
       });
 
-      onLogEvent('HALO2', 'Proof compiled in 27ms! Sinsemilla Merkle tree commit generated.', 'success');
-      onLogEvent('ORCHARD', `Transferred ${(transparentToShield - 0.0001).toFixed(4)} ZEC into Orchard Pool. Address & balance cloaked.`, 'success');
+      onLogEvent('HALO2', 'Halo 2 proof generated: Note commitment appended to Orchard Merkle tree', 'success');
+      onLogEvent('ORCHARD', `Funds shielded: 0 ZEC transparent, ${(transparentToShield - 0.0001).toFixed(4)} ZEC cloaked`, 'success');
       onAdvanceStep(4);
-    }, 1100);
+    }, 1500);
   };
 
-  // Step 4: z-to-z Send
-  const handleSendShielded = () => {
-    const amt = parseFloat(sendAmount);
-    const memoBytes = getMemoByteLength(sendMemo);
-    if (isNaN(amt) || amt <= 0 || amt > state.shieldedBalance - 0.0001 || memoBytes > 512 || isSending) {
-      return;
-    }
+  // ── Step 4: Transmit Sealed Time Capsule (z-to-z Send) ──────────────────
+  const handleSendPrivateMemo = () => {
+    if (state.shieldedBalance < 1.0 || isSending) return;
 
     setIsSending(true);
-    onLogEvent('HALO2', `Constructing Action transfer for ${amt.toFixed(4)} ZEC with ${memoBytes}B in-band memo...`, 'circuit');
+    onLogEvent('ORCHARD', `Encrypting memo payload (${getMemoByteLength(sendMemo)} bytes) via ChaCha20-Poly1305...`, 'circuit');
 
     timersRef.current.timeout = setTimeout(() => {
-      setIsSending(false);
       const txId = 'tx_z2z_' + Math.random().toString(36).substring(2, 9);
-      const sendTx = {
+      const newTx = {
         id: txId,
         timestamp: Date.now(),
         type: 'shielded_send' as const,
-        amount: amt,
+        amount: 1.0,
         fee: 0.0001,
-        sender: 'Orchard Shielded Note [CLOAKED]',
-        recipient: recipientInput,
+        sender: 'Orchard Shielded Pool (Anchor #2685120)',
+        recipient: state.unifiedAddress,
         memo: sendMemo,
         status: 'confirmed' as const,
         proofType: 'halo2_orchard_zk' as const,
@@ -215,25 +202,27 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
       };
 
       onUpdateState({
-        shieldedBalance: Math.max(0, state.shieldedBalance - amt - 0.0001),
-        transactions: [sendTx, ...state.transactions]
+        shieldedBalance: Math.max(0, state.shieldedBalance - 0.0001),
+        transactions: [newTx, ...state.transactions],
+        practiceMemo: sendMemo
       });
 
-      onLogEvent('ORCHARD', `Shielded note sealed: Nullifier derived. Zero metadata broadcast.`, 'success');
+      setIsSending(false);
+      onLogEvent('ORCHARD', `z-to-z transmission complete: Note nullifier posted. Identity & memo 100% private.`, 'success');
       onAdvanceStep(5);
-    }, 900);
+    }, 1200);
   };
+
+  const memoByteCount = getMemoByteLength(sendMemo);
+  const isMemoTooLong = memoByteCount > 512;
 
   return (
     <div className="rounded-[28px] border border-white/[0.08] bg-[#0E0C1C]/95 p-6 flex flex-col justify-between h-[740px] shadow-[0_20px_50px_-20px_rgba(86,50,245,0.3)] backdrop-blur-xl relative overflow-hidden select-none">
       
-      {/* Top Gradient Sheen */}
+      {/* Background radial glow */}
       <div 
-        className="absolute inset-x-0 top-0 h-[80px] pointer-events-none opacity-80"
-        style={{
-          background: 'linear-gradient(180deg, rgba(161, 106, 222, 0.35) 0%, rgba(119, 56, 255, 0.1) 60%, transparent 100%)',
-          mixBlendMode: 'plus-lighter',
-        }}
+        className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#5632F5]/15 blur-[120px]"
+        style={{ mixBlendMode: 'plus-lighter' }}
       />
       <div className="absolute top-0 inset-x-12 h-[1px] bg-gradient-to-r from-transparent via-[#D580FA]/60 to-transparent" />
 
@@ -245,84 +234,372 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
               PHASE 0{state.currentStep}
             </span>
             <span className="text-xs font-mono text-zinc-400">
-              {state.currentStep === 1 && 'Cryptographic Vault'}
-              {state.currentStep === 2 && 'CEX Ingress (t-address)'}
-              {state.currentStep === 3 && 'Halo 2 Orchard Cloak'}
-              {state.currentStep === 4 && 'z-to-z Encrypted Transfer'}
-              {state.currentStep === 5 && 'Mobile Scan & Mastery'}
+              {state.currentStep === 1 && 'Radar Check · See the Difference'}
+              {state.currentStep === 2 && 'Get Practice Coins · Exchange Ingress'}
+              {state.currentStep === 3 && 'Seal into Shield · Orchard ZK Pool'}
+              {state.currentStep === 4 && 'Time Capsule Memo · Private z-to-z'}
+              {state.currentStep === 5 && 'Graduation · Key Vault & Real Flight'}
             </span>
           </div>
           <h2 className="text-lg font-bold text-[#ECEAF5] mt-1 tracking-tight">
-            {state.currentStep === 1 && 'BIP-39 Master Key Generation'}
-            {state.currentStep === 2 && 'Exchange Ingress & Public Leakage'}
-            {state.currentStep === 3 && 'Synthesizing the Orchard Shield'}
-            {state.currentStep === 4 && 'Private z-to-z Note with In-Band Memo'}
-            {state.currentStep === 5 && 'ZIP-321 Certified Mobile Readiness'}
+            {state.currentStep === 1 && 'The Postcard vs. The Envelope'}
+            {state.currentStep === 2 && 'Receive 5.00 Free Practice ZEC'}
+            {state.currentStep === 3 && 'Seal Your ZEC into the Shielded Pool'}
+            {state.currentStep === 4 && 'Send Your First Private Time Capsule'}
+            {state.currentStep === 5 && 'Graduate to Solo Flight (Your Real Key)'}
           </h2>
         </div>
 
         <div className="text-right font-mono text-[11px]">
-          <span className="text-zinc-500 block">Balance</span>
+          <span className="text-zinc-500 block">Simulator Balance</span>
           <span className="font-bold text-emerald-400">
-            {state.shieldedBalance > 0 ? `${state.shieldedBalance.toFixed(4)} ZEC (ZK)` : `${state.transparentBalance.toFixed(4)} ZEC`}
+            {state.shieldedBalance > 0 
+              ? `${state.shieldedBalance.toFixed(4)} ZEC (Shielded 🛡️)` 
+              : `${state.transparentBalance.toFixed(4)} ZEC`}
           </span>
         </div>
       </div>
 
       {/* ── Active Phase Viewport ─────────────────────────────────── */}
-      <div className="relative z-10 flex-1 overflow-y-auto py-4 space-y-4">
+      <div className="relative z-10 flex-1 overflow-y-auto py-3 space-y-4">
         
-        {/* ── PHASE 1: CRYPTOGRAPHIC SEED VAULT ────────────────────── */}
+        {/* ── PHASE 1: RADAR CHECK (SEE THE DIFFERENCE) ────────────── */}
         {state.currentStep === 1 && (
-          <div className="space-y-4 animate-fade-in">
-            {/* Client selector pills */}
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-zinc-400">Target Client Profile:</span>
-              <div className="flex space-x-1.5">
+          <div className="space-y-4 animate-fade-in font-sans">
+            
+            {/* Co-Pilot Briefing Card */}
+            <div className="p-4 rounded-2xl bg-[#5632F5]/10 border border-[#7738FF]/30 space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-[#D580FA]">
+                <Sparkles className="w-4 h-4 text-[#D580FA]" />
+                <span>FLIGHT INSTRUCTOR BRIEFING</span>
+              </div>
+              <p className="text-xs text-[#ECEAF5] leading-relaxed">
+                Before you touch real money, see the fundamental difference. Public blockchains work like <strong>postcards</strong>—anyone in the world can read who sent them and how much was moved. Zcash wraps your transaction inside an <strong>opaque cryptographic envelope</strong> where only the math is verified, but all identities and balances are hidden.
+              </p>
+            </div>
+
+            {/* Interactive Toggle: Feel the Contrast */}
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-zinc-300">
+                Click to inspect both realities on the radar mirror to the right:
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Option A: Transparent Postcard */}
                 <button
-                  onClick={() => onUpdateState({ selectedWalletClient: 'zashi' })}
-                  className={`px-3 py-1 rounded-lg border text-xs transition ${
-                    state.selectedWalletClient === 'zashi'
-                      ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold shadow-sm'
-                      : 'border-white/5 bg-black/20 text-zinc-400'
+                  onClick={() => handleToggleRadarPreview('transparent')}
+                  className={`p-4 rounded-2xl border text-left transition relative cursor-pointer ${
+                    (state.radarPreview ?? 'transparent') === 'transparent'
+                      ? 'border-rose-500/50 bg-rose-500/10 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
+                      : 'border-white/[0.08] bg-[#0A0815]/80 hover:border-white/20'
                   }`}
                 >
-                  Zashi (Official ECC)
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-rose-400 flex items-center space-x-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span>The Public Postcard (t1...)</span>
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono">
+                      EXPOSED
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300 leading-snug">
+                    Sender, receiver, and balances are 100% visible on block explorers. Exchange KYC identity can be linked.
+                  </p>
                 </button>
+
+                {/* Option B: Shielded Envelope */}
                 <button
-                  onClick={() => onUpdateState({ selectedWalletClient: 'ywallet' })}
-                  className={`px-3 py-1 rounded-lg border text-xs transition ${
-                    state.selectedWalletClient === 'ywallet'
-                      ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold shadow-sm'
-                      : 'border-white/5 bg-black/20 text-zinc-400'
+                  onClick={() => handleToggleRadarPreview('shielded')}
+                  className={`p-4 rounded-2xl border text-left transition relative cursor-pointer ${
+                    state.radarPreview === 'shielded'
+                      ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                      : 'border-white/[0.08] bg-[#0A0815]/80 hover:border-white/20'
                   }`}
                 >
-                  Ywallet (Power-User)
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-emerald-400 flex items-center space-x-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>The Sealed Envelope (u1...)</span>
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
+                      MASKED
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300 leading-snug">
+                    Zero-Knowledge proofs confirm valid coins without revealing amounts or parties. Completely cloaked.
+                  </p>
                 </button>
               </div>
             </div>
 
-            {/* 24-Word Seed Grid Card */}
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-xs">
-                <div className="flex items-center space-x-2">
+            {/* Reassuring Action Prompt */}
+            <div className="pt-2">
+              <button
+                onClick={() => onAdvanceStep(2)}
+                className="w-full py-3.5 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_25px_rgba(119,56,255,0.45)] cursor-pointer hover:scale-[1.01]"
+              >
+                <span>Ready to Practice: Claim 5.00 Test ZEC (Step 2)</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <p className="text-center text-[11px] text-zinc-500 mt-2">
+                Zero risk · No real funds touched · Practice sandbox
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── PHASE 2: GET PRACTICE COINS (EXCHANGE INGRESS) ────────── */}
+        {state.currentStep === 2 && (
+          <div className="space-y-4 animate-fade-in font-sans">
+            
+            {/* Co-Pilot Briefing Card */}
+            <div className="p-4 rounded-2xl bg-[#5632F5]/10 border border-[#7738FF]/30 space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-[#D580FA]">
+                <Sparkles className="w-4 h-4 text-[#D580FA]" />
+                <span>FLIGHT INSTRUCTOR BRIEFING</span>
+              </div>
+              <p className="text-xs text-[#ECEAF5] leading-relaxed">
+                When you buy Zcash on major exchanges (Binance, Coinbase, Kraken), they default to sending funds to a <strong>Transparent address (<code className="text-rose-300 font-mono">t1...</code>)</strong>. Watch what happens to the surveillance radar the moment these coins arrive.
+              </p>
+            </div>
+
+            {/* Practice Deposit Card */}
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between text-zinc-400 border-b border-white/[0.06] pb-2">
+                <span>Simulated Ingress Source</span>
+                <span className="text-[#D580FA] font-bold">Binance Hot Wallet</span>
+              </div>
+
+              <div className="space-y-1.5 font-sans">
+                <span className="text-[11px] text-zinc-400 block font-mono">Target Deposit Address:</span>
+                <div className="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-white/5 font-mono text-[11px]">
+                  <span className="text-rose-300 truncate mr-2">{state.transparentAddress}</span>
+                  <button
+                    onClick={() => handleCopy(state.transparentAddress)}
+                    className="text-zinc-400 hover:text-white shrink-0 p-1"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-zinc-400 font-sans">Simulated Withdrawal Amount:</span>
+                <span className="text-base font-bold text-white font-mono">5.0000 ZEC</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2 pt-2">
+              <button
+                onClick={handleClaimPracticeCoins}
+                className="w-full py-3.5 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] cursor-pointer hover:scale-[1.01]"
+              >
+                <ArrowDownToLine className="w-4 h-4" />
+                <span>Claim 5.00 Free Practice ZEC from Simulated Exchange</span>
+              </button>
+
+              {state.transparentBalance > 0 && (
+                <button
+                  onClick={() => onAdvanceStep(3)}
+                  className="w-full py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 font-semibold rounded-xl text-xs flex items-center justify-center space-x-2 transition cursor-pointer"
+                >
+                  <span>Already claimed? Proceed to Shielding (Step 3) →</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── PHASE 3: SHIELD IT (ORCHARD ZK POOL) ──────────────────── */}
+        {state.currentStep === 3 && (
+          <div className="space-y-4 animate-fade-in font-sans">
+            
+            {/* Co-Pilot Briefing Card */}
+            <div className="p-4 rounded-2xl bg-[#5632F5]/10 border border-[#7738FF]/30 space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-[#D580FA]">
+                <Sparkles className="w-4 h-4 text-[#D580FA]" />
+                <span>FLIGHT INSTRUCTOR BRIEFING</span>
+              </div>
+              <p className="text-xs text-[#ECEAF5] leading-relaxed">
+                Notice the red alert on the radar: your 5.00 ZEC is currently visible to the entire world. Now let's slip it into the envelope. Shielding compiles a <strong>Halo 2 Zero-Knowledge Proof</strong> that verifies you have valid funds without revealing your balance or identity to the blockchain.
+              </p>
+            </div>
+
+            {/* Shielding Breakdown Box */}
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
+                <span>Shielding Operation</span>
+                <span className="text-emerald-400 font-bold">Transparent → Orchard Pool</span>
+              </div>
+
+              <div className="space-y-2 text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Exposed Balance to Shield:</span>
+                  <span className="text-rose-400 font-bold">{state.transparentBalance.toFixed(4)} ZEC</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Network Shielding Fee:</span>
+                  <span className="text-zinc-400">0.0001 ZEC</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Zero-Knowledge Circuit:</span>
+                  <span className="text-[#D580FA]">Halo 2 PLONKish (Orchard)</span>
+                </div>
+              </div>
+
+              {/* Progress bar if in progress */}
+              {state.isShieldingInProgress && (
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex justify-between text-[10px] text-[#EBDEFA]">
+                    <span>Compiling Zero-Knowledge Proof...</span>
+                    <span>{state.zkProofProgress}%</span>
+                  </div>
+                  <div className="w-full bg-black/60 rounded-full h-2 overflow-hidden border border-white/5">
+                    <div 
+                      className="bg-gradient-to-r from-[#7738FF] to-emerald-400 h-full transition-all duration-300"
+                      style={{ width: `${state.zkProofProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Shield Action CTA */}
+            <div className="pt-2">
+              <button
+                onClick={handleExecuteShielding}
+                disabled={state.transparentBalance <= 0 || state.isShieldingInProgress}
+                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer hover:scale-[1.01]"
+              >
+                <Shield className="w-4 h-4" />
+                <span>
+                  {state.isShieldingInProgress 
+                    ? `Synthesizing Proof (${state.zkProofProgress}%)...` 
+                    : `Shield ${state.transparentBalance.toFixed(4)} ZEC into Orchard Pool 🛡️`}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── PHASE 4: TIME CAPSULE MEMO (PRIVATE SEND) ─────────────── */}
+        {state.currentStep === 4 && (
+          <div className="space-y-4 animate-fade-in font-sans">
+            
+            {/* Co-Pilot Briefing Card */}
+            <div className="p-4 rounded-2xl bg-[#5632F5]/10 border border-[#7738FF]/30 space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-[#D580FA]">
+                <Sparkles className="w-4 h-4 text-[#D580FA]" />
+                <span>FLIGHT INSTRUCTOR BRIEFING</span>
+              </div>
+              <p className="text-xs text-[#ECEAF5] leading-relaxed">
+                Now write a letter to your future self (or recipient). On Bitcoin or Ethereum, notes are public plaintext broadcast to the whole world. On Zcash Orchard, memos are <strong>encrypted with ChaCha20-Poly1305</strong> inside the envelope—only the recipient can decrypt it.
+              </p>
+            </div>
+
+            {/* Encrypted Letter Pad */}
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
+                <span>Time Capsule Letter Pad</span>
+                <span className={`text-[10px] ${isMemoTooLong ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+                  {memoByteCount} / 512 bytes
+                </span>
+              </div>
+
+              {/* Textarea */}
+              <div className="space-y-1.5 font-sans">
+                <textarea
+                  rows={3}
+                  value={sendMemo}
+                  onChange={(e) => setSendMemo(e.target.value)}
+                  placeholder="Write a message to your future self..."
+                  className="w-full bg-black/50 border border-white/[0.1] rounded-xl p-3 text-xs text-white focus:border-[#7738FF] focus:outline-none resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* Preset Quick Fill Buttons */}
+              <div className="flex items-center space-x-2 font-sans">
+                <button
+                  type="button"
+                  onClick={() => setSendMemo('Dear future me: Privacy is an inviolable human right. Sealed with Zero-Knowledge proofs on Zcash.')}
+                  className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[10px] text-zinc-300 transition cursor-pointer"
+                >
+                  ✉️ "Letter to Future Self"
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSendMemo('Payment verified: Sovereign transaction completed with Zero-Knowledge protection. cc @zksnarks_')}
+                  className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[10px] text-zinc-300 transition cursor-pointer"
+                >
+                  🛡️ "Sovereign Receipt"
+                </button>
+              </div>
+
+              <div className="flex justify-between items-center text-[11px] pt-1 text-zinc-400">
+                <span>Transaction Value:</span>
+                <span className="font-bold text-white font-mono">1.0000 ZEC</span>
+              </div>
+            </div>
+
+            {/* Action CTA */}
+            <div className="pt-2">
+              <button
+                onClick={handleSendPrivateMemo}
+                disabled={isSending || isMemoTooLong}
+                className="w-full py-3.5 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] disabled:opacity-40 cursor-pointer hover:scale-[1.01]"
+              >
+                <Mail className="w-4 h-4" />
+                <span>{isSending ? 'Encrypting & Transmitting...' : 'Transmit Sealed Letter (Private z-to-z Send) ✉️'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── PHASE 5: GRADUATION (KEY VAULT & REAL FLIGHT) ─────────── */}
+        {state.currentStep === 5 && (
+          <div className="space-y-4 animate-fade-in font-sans">
+            
+            {/* Co-Pilot Briefing Card */}
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>FLIGHT INSTRUCTOR DEBRIEF</span>
+              </div>
+              <p className="text-xs text-[#ECEAF5] leading-relaxed">
+                You’ve completed the flight training! You now know exactly how Zcash protects you. Below is your <strong>master recovery key</strong> and your launchpad to take flight in the real world with Zashi or Ywallet.
+              </p>
+            </div>
+
+            {/* 24-Word Master Key Vault */}
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2 text-zinc-400">
+                <div className="flex items-center space-x-1.5 font-sans">
                   <Key className="w-3.5 h-3.5 text-[#D580FA]" />
-                  <span className="text-zinc-300 font-semibold text-[11px]">256-Bit WebCrypto CSPRNG Master Mnemonic</span>
+                  <span className="font-semibold text-white">Your Master Key (24 Words)</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setShowSeed(!showSeed)}
-                    className="text-zinc-400 hover:text-zinc-200 text-xs flex items-center space-x-1"
+                    className="text-zinc-400 hover:text-white text-[10px] flex items-center space-x-1"
                   >
-                    {showSeed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    <span className="text-[10px]">{showSeed ? 'Hide' : 'Reveal'}</span>
+                    {showSeed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    <span>{showSeed ? 'Hide' : 'Reveal'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleCopy(state.seedPhrase.join(' '))}
+                    className="text-[#D580FA] hover:text-white text-[10px] flex items-center space-x-1"
+                  >
+                    {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
                   </button>
                   <button
                     onClick={handleRegenerateSeed}
-                    title="Generate fresh cryptographic seed"
-                    className="text-[#D580FA] hover:text-white p-1 transition"
+                    title="Generate new 24 words"
+                    className="text-zinc-400 hover:text-white p-1"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" />
+                    <RefreshCw className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -338,295 +615,77 @@ export const ConsoleCockpit: React.FC<ConsoleCockpitProps> = ({
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* Seed Backup Challenge Verification */}
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-2.5 font-mono">
-              <div className="text-xs text-zinc-300 font-medium">
-                Flight Verification Challenge: What is word <span className="text-[#D580FA] font-bold">#{quizWordIndex + 1}</span>?
-              </div>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  placeholder="Type word to confirm..."
-                  value={quizInput}
-                  onChange={(e) => {
-                    setQuizInput(e.target.value);
-                    setQuizError(false);
-                  }}
-                  className="flex-1 bg-black/50 border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-[#7738FF] focus:outline-none"
-                />
-                <button
-                  onClick={handleVerifySeedQuiz}
-                  className="px-5 py-2 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-semibold rounded-xl text-xs transition shadow-[0_0_15px_rgba(119,56,255,0.4)] cursor-pointer"
-                >
-                  Verify Key & Proceed →
-                </button>
-              </div>
-              {quizError && (
-                <p className="text-[11px] text-rose-400">
-                  Word mismatch! (Word #{quizWordIndex + 1} is "{state.seedPhrase[quizWordIndex]}")
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── PHASE 2: CEX INGRESS & PUBLIC LEAKAGE ────────────────── */}
-        {state.currentStep === 2 && (
-          <div className="space-y-4 animate-fade-in font-mono">
-            {/* Transparent Address Card */}
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-2">
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span className="font-semibold text-white">Your Transparent Ingress Address (t1...)</span>
-                <span className="text-rose-400 text-[10px] bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/30 flex items-center space-x-1">
-                  <AlertCircle className="w-3 h-3" />
-                  <span>100% PUBLIC EXPOSURE</span>
-                </span>
-              </div>
-              <div className="bg-black/50 p-2.5 rounded-xl border border-white/5 text-xs text-zinc-300 flex items-center justify-between select-all">
-                <span className="truncate">{state.transparentAddress}</span>
-                <button onClick={() => handleCopy(state.transparentAddress)} className="ml-2 text-zinc-400 hover:text-white">
-                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
+              {/* Wallet Profile Selection */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[11px] font-sans">
+                <span className="text-zinc-400">Target Mobile Client:</span>
+                <div className="flex space-x-1.5">
+                  <button
+                    onClick={() => onUpdateState({ selectedWalletClient: 'zashi' })}
+                    className={`px-2.5 py-1 rounded-lg border text-xs transition ${
+                      state.selectedWalletClient === 'zashi'
+                        ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold'
+                        : 'border-white/5 bg-black/20 text-zinc-400'
+                    }`}
+                  >
+                    Zashi (Official ECC)
+                  </button>
+                  <button
+                    onClick={() => onUpdateState({ selectedWalletClient: 'ywallet' })}
+                    className={`px-2.5 py-1 rounded-lg border text-xs transition ${
+                      state.selectedWalletClient === 'ywallet'
+                        ? 'border-[#7738FF] bg-[#5632F5]/25 text-[#ECEAF5] font-bold'
+                        : 'border-white/5 bg-black/20 text-zinc-400'
+                    }`}
+                  >
+                    Ywallet (Power User)
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Simulated CEX Ingress Card */}
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3">
-              <div className="flex items-center justify-between text-xs font-semibold text-white">
-                <span>Simulated Exchange Ingress</span>
-                <span className="text-[#D580FA]">Binance / Coinbase Hot Wallet</span>
-              </div>
-
-              <div className="bg-black/40 p-3 rounded-xl border border-white/5 space-y-1.5 text-xs text-zinc-300">
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Asset:</span>
-                  <span className="text-white font-bold">ZEC (Zcash)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Withdrawal Amount:</span>
-                  <span className="text-[#D580FA] font-bold">5.00000000 ZEC</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Network:</span>
-                  <span className="text-zinc-300">Zcash Transparent Protocol (t-address)</span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-sans leading-relaxed">
-                ⚠️ <strong>The Transparent Trap:</strong> Centralized exchanges only pay out to transparent addresses. Anyone looking at block explorers can see your exact balance, transaction history, and exchange origin!
-              </div>
+            {/* Real World Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <a
+                href={state.selectedWalletClient === 'zashi' ? 'https://zashi.org' : 'https://ywallet.app'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-3 px-4 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition"
+              >
+                <Download className="w-4 h-4 text-[#D580FA]" />
+                <span>Install {state.selectedWalletClient === 'zashi' ? 'Zashi' : 'Ywallet'}</span>
+                <ExternalLink className="w-3.5 h-3.5 text-zinc-400 ml-1" />
+              </a>
 
               <button
-                onClick={handleCexWithdraw}
-                className="w-full py-3 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] cursor-pointer"
+                onClick={onOpenCertificate}
+                className="py-3 px-4 bg-gradient-to-r from-[#7738FF] to-[#D580FA] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_25px_rgba(119,56,255,0.4)] cursor-pointer hover:scale-[1.01]"
               >
-                <span>Execute Exchange Withdrawal (5.0 ZEC)</span>
-                <ArrowRight className="w-4 h-4" />
+                <Award className="w-4 h-4" />
+                <span>Claim Flight Certificate 🏆</span>
               </button>
             </div>
-          </div>
-        )}
-
-        {/* ── PHASE 3: ORCHARD SHIELDING ENGINE ────────────────────── */}
-        {state.currentStep === 3 && (
-          <div className="space-y-4 animate-fade-in font-mono">
-            {/* Balance Dual Meters */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="rounded-2xl bg-[#0A0815]/90 p-4 border border-rose-500/30 text-center">
-                <div className="text-[10px] text-rose-400 uppercase font-bold">Transparent Pool</div>
-                <div className="text-xl font-bold text-white mt-1">
-                  {state.transparentBalance.toFixed(4)} ZEC
-                </div>
-                <div className="text-[10px] text-zinc-500 mt-1">Naked on Explorer</div>
-              </div>
-
-              <div className="rounded-2xl bg-[#0A0815]/90 p-4 border border-emerald-500/30 text-center">
-                <div className="text-[10px] text-emerald-400 uppercase font-bold">Orchard Shielded</div>
-                <div className="text-xl font-bold text-emerald-300 mt-1">
-                  {state.shieldedBalance.toFixed(4)} ZEC
-                </div>
-                <div className="text-[10px] text-emerald-400 mt-1">100% Zero-Knowledge</div>
-              </div>
-            </div>
-
-            {/* Postcard vs Envelope Analogy */}
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 text-xs space-y-2 font-sans">
-              <div className="flex items-start space-x-2.5">
-                <FileText className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-rose-300">Transparent (Postcard):</strong> Anyone processing the block can inspect sender, receiver, balance, and timestamps.
-                </div>
-              </div>
-              <div className="flex items-start space-x-2.5">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-emerald-300">Shielded (Sealed Envelope):</strong> Ownership commitments are converted into mathematical zero-knowledge proofs.
-                </div>
-              </div>
-            </div>
-
-            {/* Shield Action CTA */}
-            {state.transparentBalance > 0 ? (
-              <button
-                onClick={handleExecuteShielding}
-                disabled={state.isShieldingInProgress}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer"
-              >
-                {state.isShieldingInProgress ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Compiling Halo 2 ZK Proof ({state.zkProofProgress}%)...</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-4 h-4" />
-                    <span>Shield {state.transparentBalance.toFixed(2)} ZEC into Orchard Pool</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-2">
-                <p className="text-xs text-emerald-300 font-medium">
-                  ✓ Funds completely insulated inside Orchard zero-knowledge pool!
-                </p>
-                <button
-                  onClick={() => onAdvanceStep(4)}
-                  className="px-6 py-2.5 bg-emerald-500 text-black font-bold rounded-xl text-xs cursor-pointer hover:bg-emerald-400 transition"
-                >
-                  Proceed to Step 4: Private z-to-z Send →
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── PHASE 4: PRIVATE Z-TO-Z TRANSFER & MEMO ─────────────── */}
-        {state.currentStep === 4 && (
-          <div className="space-y-3.5 animate-fade-in font-mono">
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-3.5 flex items-center justify-between text-xs">
-              <span className="text-zinc-400">Available Orchard Balance:</span>
-              <span className="font-bold text-emerald-400">{state.shieldedBalance.toFixed(4)} ZEC</span>
-            </div>
-
-            {/* Recipient Input */}
-            <div className="space-y-1">
-              <label className="text-[11px] text-zinc-400">Recipient Unified Address (u1...)</label>
-              <input
-                type="text"
-                value={recipientInput}
-                onChange={(e) => setRecipientInput(e.target.value)}
-                className="w-full bg-[#0A0815] border border-white/[0.1] rounded-xl p-2.5 text-xs text-zinc-200 truncate focus:border-[#7738FF] focus:outline-none"
-              />
-            </div>
-
-            {/* Amount Input */}
-            <div className="space-y-1">
-              <label className="text-[11px] text-zinc-400">Amount (ZEC)</label>
-              <input
-                type="text"
-                value={sendAmount}
-                onChange={(e) => setSendAmount(e.target.value)}
-                className="w-full bg-[#0A0815] border border-white/[0.1] rounded-xl p-2.5 text-xs text-zinc-200 focus:border-[#7738FF] focus:outline-none"
-              />
-            </div>
-
-            {/* In-Band Encrypted Memo */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                <span className="flex items-center space-x-1">
-                  <Lock className="w-3.5 h-3.5 text-[#D580FA]" />
-                  <span>512-Byte In-Band Encrypted Memo (ZIP-302)</span>
-                </span>
-                <span className={`text-[10px] ${getMemoByteLength(sendMemo) > 512 ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
-                  {getMemoByteLength(sendMemo)} / 512 bytes {getMemoByteLength(sendMemo) > 512 && '(Exceeds limit!)'}
-                </span>
-              </div>
-              <textarea
-                rows={2}
-                value={sendMemo}
-                onChange={(e) => setSendMemo(e.target.value)}
-                className={`w-full bg-[#0A0815] border rounded-xl p-2.5 text-xs text-zinc-200 resize-none focus:outline-none ${
-                  getMemoByteLength(sendMemo) > 512 ? 'border-rose-500/50' : 'border-white/[0.1] focus:border-[#7738FF]'
-                }`}
-              />
-            </div>
-
-            {/* Send Button */}
-            <button
-              onClick={handleSendShielded}
-              disabled={
-                isSending || 
-                state.shieldedBalance <= 0 || 
-                getMemoByteLength(sendMemo) > 512 || 
-                isNaN(parseFloat(sendAmount)) || 
-                parseFloat(sendAmount) <= 0 || 
-                parseFloat(sendAmount) > state.shieldedBalance - 0.0001
-              }
-              className="w-full py-3 bg-[#7738FF] hover:bg-[#8B4EFF] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_20px_rgba(119,56,255,0.4)] disabled:opacity-40 cursor-pointer"
-            >
-              {isSending ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Broadcasting Encrypted Note...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  <span>Broadcast Shielded Transaction (Zero Surveillance)</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* ── PHASE 5: REAL WORLD FLIGHT PLAN & CERTIFICATION ──────── */}
-        {state.currentStep === 5 && (
-          <div className="space-y-4 animate-fade-in text-center font-mono">
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0815]/90 p-4 space-y-3">
-              <div className="inline-flex p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <QrCode className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-white">ZIP-321 Certified Mobile QR Code</h3>
-              <p className="text-xs text-zinc-400 font-sans max-w-sm mx-auto">
-                Scan directly using official mobile clients (Zashi or Ywallet) on iOS or Android.
-              </p>
-
-              {qrDataUrl && (
-                <div className="flex justify-center my-2">
-                  <div className="p-2 bg-white rounded-2xl shadow-xl">
-                    <img src={qrDataUrl} alt="Zcash ZIP 321 QR Code" className="w-36 h-36" />
-                  </div>
-                </div>
-              )}
-
-              <div className="text-[11px] text-zinc-400 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                <span>Standard ZIP-321 URI with base64-encoded in-band memo payload verified.</span>
-              </div>
-            </div>
-
-            <button
-              onClick={onOpenCertificate}
-              className="w-full py-3.5 bg-gradient-to-r from-[#7738FF] to-[#D580FA] text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-[0_0_25px_rgba(119,56,255,0.5)] cursor-pointer hover:scale-[1.01]"
-            >
-              <Award className="w-4 h-4" />
-              <span>Claim Your Shielded Flight Certificate 🏆</span>
-            </button>
           </div>
         )}
 
       </div>
 
-      {/* ── Cockpit Footer Actions ─────────────────────────────────── */}
-      <div className="relative z-10 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-zinc-400">
+      {/* ── Cockpit Footer Progress Indicator ─────────────────────── */}
+      <div className="relative z-10 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-zinc-400 font-sans">
         <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>WebCrypto Sandbox Active</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] font-mono">
+            {state.currentStep === 1 && 'Objective: Compare Transparent vs Shielded views on the radar'}
+            {state.currentStep === 2 && 'Objective: Claim 5.00 practice coins into transparent address'}
+            {state.currentStep === 3 && 'Objective: Seal coins into Orchard zero-knowledge pool'}
+            {state.currentStep === 4 && 'Objective: Transmit encrypted time capsule note to future self'}
+            {state.currentStep === 5 && 'Mastery Achieved: Ready for real-world shielded flight'}
+          </span>
         </div>
-        <div className="text-[10px] text-zinc-500">
-          Zero capital at risk · Memory isolated
-        </div>
+
+        <span className="text-[11px] font-mono text-[#D580FA]">
+          Step {state.currentStep} of 5
+        </span>
       </div>
 
     </div>

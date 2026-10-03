@@ -67,6 +67,10 @@ export interface SimulatorState {
   // Real-world Bridge
   realAddressInput: string;
   realQrUri: string;
+  
+  // Interactive Radar Preview & Memo
+  radarPreview?: 'transparent' | 'shielded';
+  practiceMemo?: string;
 }
 
 export interface NetworkStatus {
